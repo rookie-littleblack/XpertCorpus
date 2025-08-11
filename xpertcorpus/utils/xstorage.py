@@ -39,7 +39,7 @@ class FileStorage(XpertCorpusStorage):
     """
     def __init__(self, 
                  first_entry_file_name: str,
-                 cache_path:str="./cache",
+                 cache_path:str="./output",
                  file_name_prefix:str="corpusflow_cache_step",
                  cache_type:Literal["json", "jsonl", "csv", "parquet", "pickle"] = "jsonl"
                  ):
@@ -49,8 +49,8 @@ class FileStorage(XpertCorpusStorage):
         self.cache_type = cache_type
         self.operator_step = -1
 
-        # Cache path preparation
-        if self.cache_path == "./cache" or self.cache_path == "./cache_local":
+        # Output path preparation
+        if self.cache_path == "./output":
             self.cache_path = os.path.join(self.cache_path, datetime.now().strftime("%Y%m%d-%H%M%S"))
         os.makedirs(self.cache_path, exist_ok=True)
 

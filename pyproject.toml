@@ -36,9 +36,6 @@ Github = "https://github.com/rookie-littleblack/XpertCorpus"
 Documentation = "https://github.com/rookie-littleblack/XpertCorpus"
 "Bug Reports" = "https://github.com/rookie-littleblack/XpertCorpus/issues"
 
-[project.scripts]
-xpertcorpus = "xpertcorpus.cli:main"
-
 [tool.setuptools]
 include-package-data = true
 packages = ["xpertcorpus"]
