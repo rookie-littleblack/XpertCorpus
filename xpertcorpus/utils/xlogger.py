@@ -1,8 +1,8 @@
 """
-Logger for CorpusFlow.
+Logger for XpertCorpus.
 
 @author: rookieblack
-@date  : 2025-07-10
+@date  : 2025-08-11
 """
 import os
 import json
@@ -13,6 +13,7 @@ import inspect
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 
+
 class Colors:
     RESET = "\033[0m"
     RED = "\033[31m"
@@ -22,6 +23,7 @@ class Colors:
     MAGENTA = "\033[35m"
     CYAN = "\033[36m"
     WHITE = "\033[37m"
+
 
 class ColoredFormatter(logging.Formatter):
     COLORS = {
@@ -35,6 +37,7 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record):
         log_message = super().format(record)
         return f"{self.COLORS.get(record.levelname, Colors.WHITE)}{log_message}{Colors.RESET}"
+
 
 class CustomTimedRotatingFileHandler(TimedRotatingFileHandler):
     def __init__(self, log_dir, log_filename, when='midnight', interval=1, backupCount=7, encoding='utf-8'):
@@ -85,6 +88,7 @@ class CustomTimedRotatingFileHandler(TimedRotatingFileHandler):
             TimedRotatingFileHandler.emit(self, record)
         except Exception:
             self.handleError(record)
+
 
 class CustomJSONLogger:
     _instance = None
@@ -234,12 +238,10 @@ class CustomJSONLogger:
     def debug(self, message, data=None, category=None, version=None, tags=None):
         self.log(message, data, log_level=logging.DEBUG, category=category, version=version, tags=tags)
 
+
 # Create a global logger instance
 xlogger = CustomJSONLogger.get_instance()
 
-# Define get_logger as a function
-def get_logger():
-    return xlogger
 
 if __name__ == "__main__":
     xlogger.info("Hello, World!")
