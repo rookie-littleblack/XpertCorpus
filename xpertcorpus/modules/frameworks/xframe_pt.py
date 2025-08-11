@@ -162,7 +162,7 @@ class XFramework_PT():
             return None
 
         # Reset token usage
-        self.pt_generator.llm_serving.reset_token_counts()
+        self.pt_generator.xapi.reset_token_counts()
         xlogger.info(f"===> Token usage have been reset.")
 
         # Start pipeline
@@ -205,4 +205,4 @@ class XFramework_PT():
         xlogger.info(f"===> Output path: `{self.storage.cache_path}`")
 
         # Print token usage
-        xlogger.info(f"===> Token usage: {self.pt_generator.llm_serving.get_token_counts()}")
+        xlogger.info(f"===> Token usage: {self.pt_generator.xapi.get_token_counts()}")

@@ -19,7 +19,6 @@ class XPipeline_PT(OperatorABC):
     '''
     XPipeline_PT is a class that generates pretrain data.
     '''
-
     def __init__(self, max_workers: int = 1, limit: int = 0):
         """
         Initialize the XPipeline_PT.
@@ -31,7 +30,7 @@ class XPipeline_PT(OperatorABC):
         self.max_workers = max_workers
         self.limit = limit
         self.prompts = XPrompt4CleanText()
-        self.llm_serving = XApi(max_workers=self.max_workers)
+        self.xapi = XApi(max_workers=self.max_workers)
     
     @staticmethod
     def get_desc(lang: str = "zh"):
@@ -86,7 +85,7 @@ class XPipeline_PT(OperatorABC):
         # Generate the text using the model
         try:
             xlogger.info("Generating text using the model...")
-            generated_outputs = self.llm_serving.generate_from_input(llm_inputs)
+            generated_outputs = self.xapi.generate_from_input(llm_inputs)
             xlogger.info("Text generation completed.")
         except Exception as e:
             xlogger.error(f"Error during text generation: {e}")

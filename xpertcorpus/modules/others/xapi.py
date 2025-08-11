@@ -66,7 +66,7 @@ class XApi(ApiABC):
         self.max_workers = llm_model_config.get("max_workers", 1)
         if max_workers is not None:
             self.max_workers = max_workers
-        xlogger.debug(f"XApi using max_workers: `{self.max_workers}`..")
+        xlogger.debug(f"XApi using llm_model_config: `{llm_model_config}`, max_workers: `{self.max_workers}`..")
 
         # Set logger
         self.logger = xlogger
