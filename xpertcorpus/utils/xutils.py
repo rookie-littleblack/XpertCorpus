@@ -32,6 +32,8 @@ def get_xtokenizer():
     # Return
     return xtokenizer
 
+xtokenizer = get_xtokenizer()  # 初始化一次！
+
 def count_tokens(text: str) -> int:
     """
     Calculate the number of tokens in a string.
@@ -43,7 +45,7 @@ def count_tokens(text: str) -> int:
         int: Number of tokens in the text
     """
     try:
-        return len(get_xtokenizer().encode(text))
+        return len(xtokenizer.encode(text))
     except ImportError:
         xlogger.error("Something wrong with transformer tokenizer, falling back to simple tokenization")
         return len(text.split())

@@ -328,6 +328,9 @@ secrets.json
 *.p12
 *.pfx
 
+# config
+xpertcorpus/config/config.yaml
+
 # data
 data/
 

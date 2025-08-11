@@ -1,0 +1,43 @@
+#######################################################################
+llm_model:
+  name: "LLM_MODEL_SILICONFLOW"
+  base_url: "https://api.siliconflow.cn/v1/chat/completions"
+  api_key: "<your_api_key>"
+  model_name: "THUDM/GLM-4-9B-0414"
+  temperature: 0.7
+  top_p: 999999            # 999999 means use api default value.
+  top_k: 999999            # 999999 means use api default value.
+  enable_thinking: "none"  # string type: "true", "false" or "none"! "none" means not support thinking switch.
+  max_workers: 10
+  batch_size: 10
+
+#######################################################################
+vision_model:
+  name: "VISION_MODEL_SILICONFLOW"
+  base_url: "https://api.siliconflow.cn/v1/chat/completions"
+  api_key: "<your_api_key>"
+  model_name: "THUDM/GLM-4.1V-9B-Thinking"
+  temperature: 0.7
+  top_p: 999999            # 999999 means use api default value.
+  top_k: 999999            # 999999 means use api default value.
+  enable_thinking: "none"  # string type: "true", "false" or "none"! "none" means not support thinking switch.
+  max_workers: 10
+  batch_size: 10
+
+#######################################################################
+embedding_model:
+  name: "EMBEDDING_MODEL_SILICONFLOW"
+  base_url: "https://api.siliconflow.cn/v1/embeddings"
+  api_key: "<your_api_key>"
+  model_name: "BAAI/bge-m3"
+  max_workers: 10
+  batch_size: 10
+
+#######################################################################
+rarank_model:
+  name: "RERANK_MODEL_SILICONFLOW"
+  base_url: "https://api.siliconflow.cn/v1/rerank"
+  api_key: "<your_api_key>"
+  model_name: "BAAI/bge-reranker-v2-m3"
+  max_workers: 10
+  batch_size: 10
