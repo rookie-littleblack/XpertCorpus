@@ -13,8 +13,8 @@ import argparse
 
 from datetime import datetime
 from xpertcorpus.utils.xutils import count_tokens
-from xpertcorpus.utils.storage import FileStorage
 from xpertcorpus.utils.xlogger import get_logger
+from xpertcorpus.utils.xstorage import FileStorage
 from xpertcorpus.operators.generate.XGenertors import XGeneratorPT, XTextSplitter, XLimitor
 
 

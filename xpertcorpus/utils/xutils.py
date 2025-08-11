@@ -1,3 +1,9 @@
+"""
+This script is a core utility module for the XpertCorpus project, providing reusable helper functions.
+
+@author: rookielittleblack
+@date:   2025-08-11
+"""
 import os
 
 from transformers import AutoTokenizer
