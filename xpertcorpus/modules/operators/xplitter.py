@@ -192,7 +192,7 @@ class XTextSplitter(OperatorABC):
     def run(self, storage: XpertCorpusStorage, input_key: str = "raw_content", output_key: str = None):
         """Perform text splitting and save results"""
         self.input_key, self.output_key = input_key, output_key
-        xlogger.info("Running XTextSplitter...")
+        xlogger.info(f"Running XTextSplitter: self.input_key: `{self.input_key}`, self.output_key: `{self.output_key}`...")
 
         # If the output key is not set, use the default output key
         if self.output_key is None:

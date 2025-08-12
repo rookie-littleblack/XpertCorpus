@@ -15,13 +15,13 @@ from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
 
 
 @OPERATOR_REGISTRY.register()
-class XPipeline_PT(OperatorABC):
+class XLlmCleaner(OperatorABC):
     '''
-    XPipeline_PT is a class that generates pretrain data.
+    XLlmCleaner is a class that use LLM for text cleaning.
     '''
     def __init__(self, max_workers: int = 1, limit: int = 0):
         """
-        Initialize the XPipeline_PT.
+        Initialize the XLlmCleaner.
 
         Args:
             max_workers: The number of workers.
@@ -34,16 +34,16 @@ class XPipeline_PT(OperatorABC):
     
     @staticmethod
     def get_desc(lang: str = "zh"):
-        return "基于给定文档内容，生成预训练格式的文本数据（Markdown 格式）。" if lang == "zh" else "Generate pre-training format text data (Markdown format) based on the given document content."
+        return "基于大模型对文本进行清洗。" if lang == "zh" else "Using LLM for text cleaning."
 
     def run(self, storage: XpertCorpusStorage, input_key: str = "raw_content", output_key: str = None):
         self.input_key, self.output_key = input_key, output_key
-        xlogger.info("Running XPipeline_PT...")
+        xlogger.info(f"Running XLlmCleaner: self.input_key: `{self.input_key}`, self.output_key: `{self.output_key}`...")
 
         # If the output key is not set, use the default output key
         if self.output_key is None:
             self.output_key = f"step{storage.operator_step + 1}_content"
-        xlogger.info(f"===> XPipeline_PT output key: `{self.output_key}`")
+        xlogger.info(f"===> XLlmCleaner output key: `{self.output_key}`")
 
         # Load the raw dataframe from the input file
         dataframe = storage.read('dataframe')

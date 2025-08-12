@@ -14,16 +14,15 @@ from datetime import datetime
 from xpertcorpus.utils.xutils import count_tokens
 from xpertcorpus.utils.xlogger import xlogger
 from xpertcorpus.utils.xstorage import FileStorage
+from xpertcorpus.modules.operators import XTextSplitter, XLlmCleaner
 from xpertcorpus.modules.others.xlimitor import XLimitor
-from xpertcorpus.modules.operators.xplitter import XTextSplitter
-from xpertcorpus.modules.pipelines.xpipe_pt import XPipeline_PT
+from xpertcorpus.modules.pipelines.xcleaning_pipe import XCleaningPipe
 
 
 class XFramework_PT():
     """
     XFramework_PT is a framework for generating pretrain data.
     """
-
     def __init__(self, input_file: str, output_dir: str = "./output", max_workers: int = 1, limit: int = 0):
         """
         Initialize the XFramework_PT.
@@ -59,7 +58,10 @@ class XFramework_PT():
         self.storage = FileStorage(first_entry_file_name=self.input_file, cache_path=self.output_dir)
 
         # Initialize operators
-        self.pt_generator = XPipeline_PT(max_workers=self.max_workers)
+        self.xllmcleaner = XLlmCleaner(max_workers=self.max_workers)
+
+        # Initialize pipelines
+        self.xcleaningpipe = XCleaningPipe(max_workers=self.max_workers)
 
         # Initialize corpus text splitter
         self.corpus_text_splitter = XTextSplitter(
@@ -162,7 +164,7 @@ class XFramework_PT():
             return None
 
         # Reset token usage
-        self.pt_generator.xapi.reset_token_counts()
+        self.xllmcleaner.xapi.reset_token_counts()
         xlogger.info(f"===> Token usage have been reset.")
 
         # Start pipeline
@@ -174,35 +176,32 @@ class XFramework_PT():
             xlogger.info(self.limitor.get_desc(lang="en"))
             self.limitor.run(self.storage.step())
 
-        # Run pt generator
-        xlogger.info(self.pt_generator.get_desc(lang="en"))
-        pt_generator_output_key = self.pt_generator.run(
+        # Run XLlmCleaner
+        xlogger.info(self.xllmcleaner.get_desc(lang="en"))
+        xllmcleaner_output_key = self.xllmcleaner.run(
             self.storage.step(),
             input_key="raw_content"
         )
-        xlogger.info(f"===> PT generator output key: `{pt_generator_output_key}`")
+        xlogger.info(f"===> XLlmCleaner output key: `{xllmcleaner_output_key}`")
+
+        # Run XCleaningPipe
+        xlogger.info(self.xcleaningpipe.get_desc(lang="en"))
+        xcleaningpipe_output_key = self.xcleaningpipe.run(
+            self.storage.step(),
+            input_key=xllmcleaner_output_key
+        )
+        xlogger.info(f"===> XCleaningPipe output key: `{xcleaningpipe_output_key}`")
 
         # Run corpus text splitter
         xlogger.info(self.corpus_text_splitter.get_desc(lang="en"))
         corpus_text_splitter_output_key = self.corpus_text_splitter.run(
             self.storage.step(),
-            input_key=pt_generator_output_key
+            input_key=xcleaningpipe_output_key
         )
         xlogger.info(f"===> Corpus text splitter output key: `{corpus_text_splitter_output_key}`")
-
-
-
-
-
-
-
-
-
-
-
 
         # Print final output path
         xlogger.info(f"===> Output path: `{self.storage.cache_path}`")
 
         # Print token usage
-        xlogger.info(f"===> Token usage: {self.pt_generator.xapi.get_token_counts()}")
+        xlogger.info(f"===> Token usage: {self.xllmcleaner.xapi.get_token_counts()}")
