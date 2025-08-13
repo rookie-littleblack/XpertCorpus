@@ -89,7 +89,7 @@ def _on_init(self) -> None:
 
 @abstractmethod
 def _prepare_components(self) -> None:
-    """准备框架组件（操作符、管道等）"""
+    """准备框架组件（算子、管道等）"""
     pass
 
 @abstractmethod
@@ -120,10 +120,10 @@ def set_config(self, key: str, value: Any) -> 'FrameworkABC':
 
 ```python
 def add_operator(self, name: str, operator: OperatorABC) -> 'FrameworkABC':
-    """添加操作符"""
+    """添加算子"""
     
 def get_operator(self, name: str) -> Optional[OperatorABC]:
-    """获取操作符"""
+    """获取算子"""
     
 def add_pipeline(self, name: str, pipeline: Any) -> 'FrameworkABC':
     """添加管道"""
@@ -294,13 +294,13 @@ framework = FrameworkManager.create_framework(
 - `metadata`: 框架元数据字典
 - `metrics`: 性能指标字典
 - `config`: 配置字典
-- `operators`: 已注册操作符字典
+- `operators`: 已注册算子字典
 - `pipelines`: 已注册管道字典
 - `storage`: 存储实例
 
 ## 相关文档
 
-- [操作符基类 (xoperator)](xoperator.md)
+- [算子基类 (xoperator)](xoperator.md)
 - [注册系统 (xregistry)](xregistry.md)
 - [异常处理 (xerror_handler)](../utils/xerror_handler.md)
 

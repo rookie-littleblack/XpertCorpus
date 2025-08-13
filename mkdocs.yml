@@ -161,7 +161,7 @@ nav:
     - 基础设施层:
       - api/others/README.md
       - 框架基础系统: api/others/xframework.md
-      - 操作符基类: api/others/xoperator.md
+      - 算子基类: api/others/xoperator.md
       - 注册系统: api/others/xregistry.md
     - 微操作层:
       - api/microops/README.md

@@ -1,16 +1,16 @@
-# 操作符基类 (xoperator)
+# 算子基类 (xoperator)
 
-`xpertcorpus.modules.others.xoperator` 模块提供操作符抽象基类和生命周期管理功能。
+`xpertcorpus.modules.others.xoperator` 模块提供算子抽象基类和生命周期管理功能。
 
 ## 模块概述
 
-操作符基类模块定义了 XpertCorpus 框架中所有操作符的统一接口，提供生命周期管理、配置管理和钩子系统。
+算子基类模块定义了 XpertCorpus 框架中所有算子的统一接口，提供生命周期管理、配置管理和钩子系统。
 
 ## 核心组件
 
 ### OperatorState
 
-操作符生命周期状态枚举。
+算子生命周期状态枚举。
 
 ```python
 from xpertcorpus.modules.others.xoperator import OperatorState
@@ -26,14 +26,14 @@ class OperatorState(Enum):
 
 ### OperatorABC
 
-操作符抽象基类，所有操作符都应继承此类。
+算子抽象基类，所有算子都应继承此类。
 
 ```python
 class OperatorABC(ABC):
     """Abstract base class for all operators in XpertCorpus."""
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """初始化操作符"""
+        """初始化算子"""
 ```
 
 #### 抽象方法（必须实现）
@@ -41,12 +41,12 @@ class OperatorABC(ABC):
 ```python
 @abstractmethod
 def run(self) -> Any:
-    """执行操作符的主要逻辑，子类必须实现"""
+    """执行算子的主要逻辑，子类必须实现"""
     pass
 
 @abstractmethod
 def get_desc(self, lang: str = "zh") -> str:
-    """获取操作符描述，子类必须实现"""
+    """获取算子描述，子类必须实现"""
     pass
 ```
 
@@ -76,7 +76,7 @@ def _on_complete(self) -> None:
 
 ```python
 def configure(self, config: Dict[str, Any]) -> 'OperatorABC':
-    """配置操作符"""
+    """配置算子"""
     
 def validate_config(self) -> bool:
     """验证配置（默认返回 True）"""
@@ -108,10 +108,10 @@ def execute(self, *args, **kwargs) -> Any:
     """完整的执行流程，包含生命周期管理"""
     
 def stop(self) -> None:
-    """停止操作符执行"""
+    """停止算子执行"""
     
 def reset(self) -> 'OperatorABC':
-    """重置操作符状态"""
+    """重置算子状态"""
 ```
 
 #### 信息获取方法
@@ -130,29 +130,29 @@ def get_info(self) -> Dict[str, Any]:
     """获取完整信息"""
 ```
 
-## 操作符管理器
+## 算子管理器
 
 ### OperatorManager
 
-提供操作符创建和管理功能。
+提供算子创建和管理功能。
 
 ```python
 class OperatorManager:
-    """操作符管理器"""
+    """算子管理器"""
     
     @staticmethod
     def create_operator(operator_name: str,
                        config: Optional[Dict[str, Any]] = None,
                        **kwargs) -> OperatorABC:
-        """创建操作符实例"""
+        """创建算子实例"""
     
     @staticmethod
     def list_operators() -> List[str]:
-        """列出所有已注册的操作符"""
+        """列出所有已注册的算子"""
     
     @staticmethod
     def get_operator_info(operator_name: str) -> Dict[str, Any]:
-        """获取操作符信息"""
+        """获取算子信息"""
 ```
 
 ### 工具函数
@@ -161,21 +161,21 @@ class OperatorManager:
 def get_operator(operator_name: str,
                 config: Optional[Dict[str, Any]] = None,
                 **kwargs) -> OperatorABC:
-    """获取操作符实例（推荐使用）"""
+    """获取算子实例（推荐使用）"""
 
 def get_operator_legacy(operator_name: str, args: Any) -> OperatorABC:
-    """兼容旧版本的操作符获取方法"""
+    """兼容旧版本的算子获取方法"""
 ```
 
 ## 使用示例
 
-### 基本操作符实现
+### 基本算子实现
 
 ```python
 from xpertcorpus.modules.others.xoperator import OperatorABC, OperatorState
 
 class CustomOperator(OperatorABC):
-    """自定义操作符示例"""
+    """自定义算子示例"""
     
     def _on_init(self):
         # 初始化逻辑
@@ -187,22 +187,22 @@ class CustomOperator(OperatorABC):
         return {"processed": self.processed_count}
     
     def get_desc(self, lang="zh") -> str:
-        return "自定义操作符"
+        return "自定义算子"
 
-# 使用操作符
+# 使用算子
 operator = CustomOperator(config={"batch_size": 100})
 result = operator.execute()
 ```
 
-### 使用操作符管理器
+### 使用算子管理器
 
 ```python
 from xpertcorpus.modules.others.xoperator import OperatorManager, get_operator
 
-# 列出可用操作符
+# 列出可用算子
 available_operators = OperatorManager.list_operators()
 
-# 创建操作符
+# 创建算子
 operator = OperatorManager.create_operator(
     "custom_operator",
     config={"param1": "value1"}
@@ -229,16 +229,16 @@ operator = CustomOperator()
 operator.add_hook("before_run", before_run_hook)
 operator.add_hook("after_run", after_run_hook)
 
-# 执行操作符（会触发钩子）
+# 执行算子（会触发钩子）
 result = operator.execute()
 ```
 
 ## 内置属性和状态
 
-操作符实例包含以下重要属性：
+算子实例包含以下重要属性：
 
 - `config`: 配置字典
-- `state`: 当前操作符状态
+- `state`: 当前算子状态
 - `metadata`: 元数据字典（包含创建时间、名称、版本等）
 - `metrics`: 性能指标字典（执行次数、处理时间、错误次数等）
 

@@ -48,7 +48,7 @@ class CustomFramework(FrameworkABC):
         pass
     
     def _prepare_components(self):
-        """准备框架所需的组件，如操作符和管道"""
+        """准备框架所需的组件，如算子和管道"""
         pass
     
     def _execute_pipeline(self):

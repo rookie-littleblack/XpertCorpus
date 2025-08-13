@@ -119,7 +119,7 @@ def clear_cache(self) -> None:
 
 ## 全局注册器
 
-模块提供了一个全局的操作符注册器实例：
+模块提供了一个全局的算子注册器实例：
 
 ```python
 from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
@@ -163,7 +163,7 @@ ComponentClass = registry.get("MyComponent")
 AnotherClass = registry.get("custom_name")
 ```
 
-### 使用全局操作符注册器
+### 使用全局算子注册器
 
 ```python
 from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
@@ -173,7 +173,7 @@ class MyAwesomeOperator:
     def run(self):
         return "Awesome result"
 
-# 获取操作符
+# 获取算子
 OperatorClass = OPERATOR_REGISTRY.get("MyAwesomeOperator")
 operator = OperatorClass()
 result = operator.run()
@@ -205,14 +205,14 @@ print(f"Total registered operators: {stats['total_registered']}")
 支持组件级别的 TTL 缓存，自动清理过期项。
 
 ### 懒加载
-`get` 方法在 `operator` 注册表中支持懒加载，当首次请求一个未注册的操作符时，会尝试从标准的操作符模块路径中动态导入。
+`get` 方法在 `operator` 注册表中支持懒加载，当首次请求一个未注册的算子时，会尝试从标准的算子模块路径中动态导入。
 
 ### 统计和监控
 提供详细的使用统计和性能监控信息。
 
 ## 相关文档
 
-- [操作符基类 (xoperator)](xoperator.md)
+- [算子基类 (xoperator)](xoperator.md)
 - [框架系统 (xframework)](xframework.md)
 - [异常处理 (xerror_handler)](../utils/xerror_handler.md)
 

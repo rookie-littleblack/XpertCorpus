@@ -19,13 +19,13 @@ Others 模块为 XpertCorpus 框架提供核心的抽象基类和基础设施组
 - 错误处理和性能监控
 - 钩子系统和事件机制
 
-### ⚙️ [操作符基类 (xoperator)](xoperator.md)
-操作符抽象基类和生命周期管理。
+### ⚙️ [算子基类 (xoperator)](xoperator.md)
+算子抽象基类和生命周期管理。
 
 **核心类：**
-- `OperatorABC` - 操作符抽象基类
-- `OperatorManager` - 操作符管理器
-- `OperatorState` - 操作符状态枚举
+- `OperatorABC` - 算子抽象基类
+- `OperatorManager` - 算子管理器
+- `OperatorState` - 算子状态枚举
 
 **主要功能：**
 - 生命周期管理和状态追踪
@@ -84,12 +84,12 @@ from xpertcorpus.modules.others import (
 ```
 Others 模块内部依赖：
 
-xframework → xoperator → xregistry  # 框架基类依赖操作符和注册系统
-xoperator → xregistry               # 操作符基类依赖注册系统
+xframework → xoperator → xregistry  # 框架基类依赖算子和注册系统
+xoperator → xregistry               # 算子基类依赖注册系统
 
 外部依赖（工具层）：
 xframework → xerror_handler → xlogger  # 框架基类依赖错误处理和日志
-xoperator → xerror_handler → xlogger   # 操作符基类依赖错误处理和日志
+xoperator → xerror_handler → xlogger   # 算子基类依赖错误处理和日志
 xregistry → xerror_handler → xlogger   # 注册系统依赖错误处理和日志
 ```
 
@@ -117,7 +117,7 @@ class MyFramework(FrameworkABC):
         pass
 ```
 
-### 2. 操作符开发
+### 2. 算子开发
 ```python
 from xpertcorpus.modules.others.xoperator import OperatorABC
 
@@ -127,7 +127,7 @@ class MyOperator(OperatorABC):
         return "processed_data"
 
     def get_desc(self, lang: str = "zh") -> str:
-        return "一个自定义操作符"
+        return "一个自定义算子"
 ```
 
 ### 3. 组件注册
@@ -156,7 +156,7 @@ component_class = custom_registry.get("MyCustomComponent")
 
 ### v0.1.0 (2025-08-13)
 - ✨ **新增框架基础系统** (`xframework`)：框架抽象基类和生命周期管理
-- 🔧 **优化操作符系统** (`xoperator`)：增加生命周期管理、配置验证、钩子机制等功能
+- 🔧 **优化算子系统** (`xoperator`)：增加生命周期管理、配置验证、钩子机制等功能
 - 🔧 **优化注册系统** (`xregistry`)：增加缓存、懒加载、性能统计等功能
 - 📝 **完善文档系统**：新增完整的API文档和使用示例
 
