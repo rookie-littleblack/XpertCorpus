@@ -416,7 +416,7 @@ class XErrorHandler:
                 
             error_info = self.reporter.report_error(exc_value)
             xlogger.error(f"Uncaught exception: {error_info.message}", 
-                         extra={"error_info": error_info.to_dict()})
+                         data={"error_info": error_info.to_dict()})
             
         sys.excepthook = handle_exception
     

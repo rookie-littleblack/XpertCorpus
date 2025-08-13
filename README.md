@@ -21,7 +21,7 @@ conda activate xpertcorpus
 pip install -r requirements
 
 # 基于实例数据运行脚本
-python -m xpertcorpus.main
+python -m xpertcorpus.main --input ./data/20250710-1750_raw_content_test_1.jsonl --output ./output --max_workers 10
 ```
 
 ## 鸣谢

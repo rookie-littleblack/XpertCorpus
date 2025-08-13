@@ -7,7 +7,7 @@ configuration management, storage operations, error handling, and so on.
 @author: rookielittleblack
 @date:   2025-08-13
 """
-from .xutils import get_xtokenizer, count_tokens
+from .xutils import get_xtokenizer, count_tokens, xtokenizer
 from .xlogger import xlogger
 from .xconfig import XConfigLoader
 from .xstorage import XpertCorpusStorage, FileStorage
@@ -23,6 +23,7 @@ from .xerror_handler import (
     error_handler
 )
 
+
 __all__ = [
     # Logger
     'xlogger',
@@ -35,6 +36,7 @@ __all__ = [
     'FileStorage',
     
     # Utilities
+    'xtokenizer',
     'get_xtokenizer',
     'count_tokens',
     
