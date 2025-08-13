@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,37 +8,25 @@ authors = [
     {name = "rookielittleblack", email = "rookielittleblack@yeah.net"},
 ]
 description = "A lightweight end-to-end framework for large model corpus construction."
-readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.10, <4"
+readme = "README.md"
+requires-python = ">=3.10"
 license = {text = "Apache-2.0"}
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "License :: Free For Educational Use",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3 :: Only",
-]
-keywords = [
-    "AI",
-    "artificial intelligence",
-    "LLM",
-    "Corpus"
-]
+keywords = ["AI", "LLM", "corpus", "text-processing"]
 dynamic = ["version", "dependencies"]
 
 [project.urls]
-Github = "https://github.com/rookie-littleblack/XpertCorpus"
-Documentation = "https://github.com/rookie-littleblack/XpertCorpus"
-"Bug Reports" = "https://github.com/rookie-littleblack/XpertCorpus/issues"
+Homepage = "https://github.com/rookie-littleblack/XpertCorpus"
+Repository = "https://github.com/rookie-littleblack/XpertCorpus"
+Issues = "https://github.com/rookie-littleblack/XpertCorpus/issues"
+
+[project.scripts]
+xpertcorpus = "xpertcorpus.main:main"
 
 [tool.setuptools]
-include-package-data = true
 packages = ["xpertcorpus"]
+
+[tool.setuptools.package-data]
+xpertcorpus = ["config/*.yaml"]
 
 [tool.setuptools.dynamic]
 version = {attr = "xpertcorpus.version.__version__"}

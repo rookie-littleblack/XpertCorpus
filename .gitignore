@@ -328,11 +328,103 @@ secrets.json
 *.p12
 *.pfx
 
-# config
+# XpertCorpus 项目特定配置
+# 配置文件 - 包含敏感信息的配置
 xpertcorpus/config/config.yaml
+config.yaml
+.env
+*.env
 
-# data
+# 数据目录 - 避免提交大文件
 data/
+datasets/
+corpus/
+raw_data/
 
-# output
+# 输出目录 - 处理结果
 output/
+outputs/
+results/
+processed/
+cleaned/
+splits/
+
+# 缓存目录
+cache/
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 日志文件
+logs/
+*.log
+*.log.*
+
+# 临时文件
+temp/
+tmp/
+temporary/
+.tmp/
+
+# 模型和检查点文件
+models/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors
+
+# 实验和开发文件
+experiments/
+playground/
+sandbox/
+test_outputs/
+dev/
+
+# 备份文件
+*.bak
+*.backup
+*~
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 压缩文件
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# 大模型相关
+embeddings/
+vectors/
+indices/
+
+# 多媒体文件
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.mp3
+*.wav
+*.ogg
+
+# 文档编译输出
+docs/_build/
+docs/build/
+
+# 性能分析文件
+*.prof
+profile_*
+
+# Cursor
+.cursorrules
