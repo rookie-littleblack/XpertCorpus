@@ -7,7 +7,7 @@ This script is a core utility module for the XpertCorpus project, providing reus
 import os
 
 from transformers import AutoTokenizer
-from xpertcorpus.utils.xlogger import xlogger
+from xpertcorpus.utils.xlogger import xlogger  # Please import xlogger from `xpertcorpus.utils.xlogger`, not `xpertcorpus.utils`
 
 
 def get_xtokenizer():

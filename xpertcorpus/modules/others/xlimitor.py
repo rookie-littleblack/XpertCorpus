@@ -4,8 +4,7 @@ This operator is used to limit the number of rows in the dataframe.
 @author: rookielittleblack
 @date:   2025-08-11
 """
-from xpertcorpus.utils.xlogger import xlogger
-from xpertcorpus.utils.xstorage import XpertCorpusStorage
+from xpertcorpus.utils import xlogger, XpertCorpusStorage
 from xpertcorpus.modules.others.xoperator import OperatorABC
 from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
 

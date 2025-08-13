@@ -13,9 +13,8 @@ import threading
 from abc import ABC, abstractmethod
 from tqdm import tqdm
 from typing import Any, List
+from xpertcorpus.utils import xlogger, XConfigLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from xpertcorpus.utils.xlogger import xlogger
-from xpertcorpus.utils.xconfig import XConfigLoader
 
 
 class ApiABC(ABC):

@@ -5,7 +5,7 @@ XXXXXX
 @date:   2025-08-11
 """
 from abc import ABC, abstractmethod
-from xpertcorpus.utils.xlogger import xlogger
+from xpertcorpus.utils import xlogger
 from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
 
 

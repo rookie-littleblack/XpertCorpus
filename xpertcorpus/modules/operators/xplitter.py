@@ -12,10 +12,8 @@ from chonkie import (
     SemanticChunker,
     RecursiveChunker
 )
+from xpertcorpus.utils import xlogger, xtokenizer, count_tokens, XpertCorpusStorage
 from langchain.text_splitter import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
-from xpertcorpus.utils.xutils import xtokenizer, count_tokens
-from xpertcorpus.utils.xlogger import xlogger
-from xpertcorpus.utils.xstorage import XpertCorpusStorage
 from xpertcorpus.modules.others.xoperator import OperatorABC
 from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
 

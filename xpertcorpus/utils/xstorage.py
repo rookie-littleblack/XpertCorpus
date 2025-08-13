@@ -14,7 +14,7 @@ import pandas as pd
 from abc import ABC, abstractmethod
 from typing import Any, Literal
 from datetime import datetime
-from xpertcorpus.utils.xlogger import xlogger
+from xpertcorpus.utils import xlogger
 
 
 class XpertCorpusStorage(ABC):

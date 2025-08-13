@@ -4,10 +4,8 @@ This script is the pipeline of generating pretraining data.
 @author: rookielittleblack
 @date:   2025-08-11
 """
+from xpertcorpus.utils import xlogger, count_tokens, XpertCorpusStorage
 from concurrent.futures import ThreadPoolExecutor
-from xpertcorpus.utils.xutils import count_tokens
-from xpertcorpus.utils.xlogger import xlogger
-from xpertcorpus.utils.xstorage import XpertCorpusStorage
 from xpertcorpus.modules.others.xapi import XApi
 from xpertcorpus.modules.others.xprompts import XPrompt4CleanText
 from xpertcorpus.modules.others.xoperator import OperatorABC

@@ -12,7 +12,7 @@ import importlib.util
 from pathlib import Path
 from rich.table import Table
 from rich.console import Console
-from xpertcorpus.utils.xlogger import xlogger
+from xpertcorpus.utils import xlogger
 
 
 class Registry():

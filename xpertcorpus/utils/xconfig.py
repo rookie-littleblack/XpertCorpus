@@ -7,7 +7,7 @@ Config for XpertCorpus.
 import os
 import yaml
 
-from xpertcorpus.utils.xlogger import xlogger
+from xpertcorpus.utils import xlogger
 
 
 class XConfigLoader:

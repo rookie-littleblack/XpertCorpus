@@ -4,9 +4,8 @@ This pipeline is used for text cleaning.
 @author: rookielittleblack
 @date:   2025-08-12
 """
+from xpertcorpus.utils import xlogger, XpertCorpusStorage
 from concurrent.futures import ThreadPoolExecutor
-from xpertcorpus.utils.xlogger import xlogger
-from xpertcorpus.utils.xstorage import XpertCorpusStorage
 from xpertcorpus.modules.microops import RemoveEmoticonsMicroops, RemoveEmojiMicroops
 from xpertcorpus.modules.others.xoperator import OperatorABC
 from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY

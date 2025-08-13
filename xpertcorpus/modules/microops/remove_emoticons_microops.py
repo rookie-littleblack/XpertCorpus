@@ -6,7 +6,7 @@ Micro-ops: remove emoticons
 """
 import re
 
-from xpertcorpus.utils.xlogger import xlogger
+from xpertcorpus.utils import xlogger
 from xpertcorpus.modules.others.xoperator import OperatorABC
 from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
 
