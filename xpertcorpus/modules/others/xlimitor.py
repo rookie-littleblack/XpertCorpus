@@ -5,11 +5,10 @@ This operator is used to limit the number of rows in the dataframe.
 @date:   2025-08-11
 """
 from xpertcorpus.utils import xlogger, XpertCorpusStorage
-from xpertcorpus.modules.others.xoperator import OperatorABC
-from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
+from xpertcorpus.modules.others.xoperator import OperatorABC, register_operator
 
 
-@OPERATOR_REGISTRY.register()
+@register_operator("limitor")
 class XLimitor(OperatorABC):
     def __init__(self, limit: int = 0):
         """

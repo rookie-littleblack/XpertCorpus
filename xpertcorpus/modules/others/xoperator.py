@@ -16,6 +16,25 @@ from xpertcorpus.utils.xerror_handler import error_handler, safe_execute
 from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
 
 
+# Create operator registration decorator
+def register_operator(name: str):
+    """
+    Decorator for registering operator classes.
+    
+    Args:
+        name: Operator name for registration
+        
+    Example:
+        @register_operator("text_cleaner")
+        class TextCleanerOperator(OperatorABC):
+            pass
+    """
+    def decorator(operator_class):
+        OPERATOR_REGISTRY.register(operator_class, name)
+        return operator_class
+    return decorator
+
+
 class OperatorState(Enum):
     """Operator lifecycle states."""
     INITIALIZED = "INITIALIZED"

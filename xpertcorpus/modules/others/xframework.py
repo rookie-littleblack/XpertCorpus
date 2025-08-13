@@ -27,6 +27,27 @@ from xpertcorpus.utils import xlogger, error_handler, safe_execute, FileStorage
 from xpertcorpus.modules.others.xoperator import OperatorABC
 
 
+# Create pipeline registration decorator at module level
+def register_framework(name: str):
+    """
+    Decorator for registering framework classes.
+    
+    Args:
+        name: Framework name for registration
+        
+    Example:
+        @register_framework("pretraining")
+        class PretrainingFramework(FrameworkABC):
+            pass
+    """
+    def decorator(framework_class: Type[FrameworkABC]):
+        from xpertcorpus.modules.others.xregistry import FRAMEWORK_REGISTRY
+        FRAMEWORK_REGISTRY.register(framework_class, name)
+        FrameworkManager.register_framework(name, framework_class)
+        return framework_class
+    return decorator 
+
+
 class FrameworkState(Enum):
     """
     Framework lifecycle states.
@@ -629,12 +650,3 @@ class FrameworkManager:
             limit=limit,
             config=config
         )
-
-
-# Utility functions
-def register_framework(name: str):
-    """Decorator for registering frameworks."""
-    def decorator(framework_class: Type[FrameworkABC]):
-        FrameworkManager.register_framework(name, framework_class)
-        return framework_class
-    return decorator 

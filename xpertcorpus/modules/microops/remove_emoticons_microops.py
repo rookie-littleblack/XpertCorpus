@@ -7,11 +7,10 @@ Micro-ops: remove emoticons
 import re
 
 from xpertcorpus.utils import xlogger
-from xpertcorpus.modules.others.xoperator import OperatorABC
-from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
+from xpertcorpus.modules.others.xoperator import OperatorABC, register_operator
 
 
-@OPERATOR_REGISTRY.register()
+@register_operator("remove_emoticons")
 class RemoveEmoticonsMicroops(OperatorABC):
     def __init__(self):
         xlogger.info(f"Initializing {self.__class__.__name__} ...")

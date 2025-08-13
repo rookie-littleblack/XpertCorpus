@@ -450,8 +450,10 @@ class Registry:
             return self._obj_map.copy()
 
 
-# Global operator registry instance
+# Global registry instances
 OPERATOR_REGISTRY = Registry('operator')
+PIPELINE_REGISTRY = Registry('pipeline')
+FRAMEWORK_REGISTRY = Registry('framework')
 
 
 class LazyLoader(types.ModuleType):

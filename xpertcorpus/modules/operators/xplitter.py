@@ -14,8 +14,7 @@ from chonkie import (
 )
 from xpertcorpus.utils import xlogger, xtokenizer, count_tokens, XpertCorpusStorage
 from langchain.text_splitter import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
-from xpertcorpus.modules.others.xoperator import OperatorABC
-from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
+from xpertcorpus.modules.others.xoperator import OperatorABC, register_operator
 
 
 class LangchainMarkdownSplitter:
@@ -75,7 +74,7 @@ class LangchainMarkdownSplitter:
         return final_chunks
 
 
-@OPERATOR_REGISTRY.register()
+@register_operator("text_splitter")
 class XTextSplitter(OperatorABC):
     def __init__(self, chunk_size: int = 8192, chunk_overlap: int = 200, split_method: str = "semantic", min_tokens_per_chunk: int = 100, limit: int = 0):
         """

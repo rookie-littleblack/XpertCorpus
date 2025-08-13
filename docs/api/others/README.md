@@ -19,6 +19,19 @@ Others 模块为 XpertCorpus 框架提供核心的抽象基类和基础设施组
 - 错误处理和性能监控
 - 钩子系统和事件机制
 
+### 🔗 [管道基础系统 (xpipeline)](xpipeline.md)
+管道抽象基类和算子编排功能。
+
+**核心类：**
+- `PipelineABC` - 管道抽象基类
+- `PipelineState` - 管道状态枚举
+
+**主要功能：**
+- 多算子编排和顺序执行
+- 简化的状态管理（6种状态）
+- 并行处理支持
+- 算子生命周期协调
+
 ### ⚙️ [算子基类 (xoperator)](xoperator.md)
 算子抽象基类和生命周期管理。
 
@@ -135,7 +148,7 @@ class MyOperator(OperatorABC):
 from xpertcorpus.modules.others.xregistry import create_registry, OPERATOR_REGISTRY
 
 # 使用全局注册器
-@OPERATOR_REGISTRY.register
+@register_operator("example_operator")
 class MyNewOperator(OperatorABC):
     # ...
     pass

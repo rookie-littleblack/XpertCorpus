@@ -166,15 +166,19 @@ AnotherClass = registry.get("custom_name")
 ### 使用全局算子注册器
 
 ```python
-from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
+from xpertcorpus.modules.others.xoperator import register_operator, OperatorABC
 
-@OPERATOR_REGISTRY.register
-class MyAwesomeOperator:
+@register_operator("my_awesome_operator")
+class MyAwesomeOperator(OperatorABC):
     def run(self):
         return "Awesome result"
+    
+    def get_desc(self, lang="zh"):
+        return "我的超棒算子"
 
 # 获取算子
-OperatorClass = OPERATOR_REGISTRY.get("MyAwesomeOperator")
+from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
+OperatorClass = OPERATOR_REGISTRY.get("my_awesome_operator")
 operator = OperatorClass()
 result = operator.run()
 ```
@@ -182,10 +186,16 @@ result = operator.run()
 ### 元数据和统计
 
 ```python
-# 注册时添加元数据
-@OPERATOR_REGISTRY.register(metadata={"version": "2.0"})
-class AdvancedOperator:
-    pass
+# 注册算子（新的统一方式）
+@register_operator("advanced_operator")
+class AdvancedOperator(OperatorABC):
+    VERSION = "2.0"
+    
+    def run(self):
+        return "Advanced result"
+    
+    def get_desc(self, lang="zh"):
+        return "高级算子"
 
 # 获取元数据
 metadata = OPERATOR_REGISTRY.get_metadata("AdvancedOperator")

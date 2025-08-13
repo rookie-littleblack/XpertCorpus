@@ -8,11 +8,10 @@ from xpertcorpus.utils import xlogger, count_tokens, XpertCorpusStorage
 from concurrent.futures import ThreadPoolExecutor
 from xpertcorpus.modules.others.xapi import XApi
 from xpertcorpus.modules.others.xprompts import XPrompt4CleanText
-from xpertcorpus.modules.others.xoperator import OperatorABC
-from xpertcorpus.modules.others.xregistry import OPERATOR_REGISTRY
+from xpertcorpus.modules.others.xoperator import OperatorABC, register_operator
 
 
-@OPERATOR_REGISTRY.register()
+@register_operator("llm_cleaner")
 class XLlmCleaner(OperatorABC):
     '''
     XLlmCleaner is a class that use LLM for text cleaning.
