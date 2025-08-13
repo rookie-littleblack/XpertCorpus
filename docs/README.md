@@ -10,6 +10,7 @@ docs/
 ├── api/                        # API 参考文档
 │   ├── README.md              # API 文档导航
 │   ├── utils/                 # 工具层 API 文档
+│   ├── others/                # 基础设施层 API 文档
 │   ├── microops/              # 微操作层 API 文档
 │   ├── operators/             # 算子层 API 文档
 │   ├── pipelines/             # 管道层 API 文档
@@ -54,6 +55,7 @@ docs/
 
 ### 📚 API 文档
 - [工具层 API](api/utils/README.md) - 日志、配置、存储、异常处理等
+- [基础设施层 API](api/others/README.md) - 框架基类、操作符基类、注册系统等
 - [微操作层 API](api/microops/README.md) - 原子级数据处理操作
 - [算子层 API](api/operators/README.md) - 复合数据处理操作
 - [管道层 API](api/pipelines/README.md) - 数据处理流水线

@@ -15,6 +15,13 @@ XpertCorpus 采用四层架构设计，从底层到顶层分别是：
 - **[存储管理 (xstorage)](utils/xstorage.md)** - 多格式文件读写
 - **[工具函数 (xutils)](utils/xutils.md)** - 令牌计数等通用工具
 
+### 🔩 [基础设施层 (Others)](others/README.md)
+核心抽象基类和基础设施组件，为整个框架提供架构支撑。
+
+- **[框架基础系统 (xframework)](others/xframework.md)** - 框架抽象基类和生命周期管理
+- **[操作符基类 (xoperator)](others/xoperator.md)** - 操作符抽象基类和管理功能
+- **[注册系统 (xregistry)](others/xregistry.md)** - 组件注册和动态加载管理
+
 ### ⚛️ [微操作层 (Microops)](microops/README.md)
 原子级数据处理操作，功能单一且可复用。
 

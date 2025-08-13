@@ -19,6 +19,7 @@
 - 错误上下文收集
 - 统计报告和分析
 
+
 ### 📋 [日志系统 (xlogger)](xlogger.md)
 结构化日志记录系统，支持JSON格式和彩色控制台输出。
 
@@ -54,9 +55,9 @@ YAML配置文件加载和管理。
 
 **主要功能：**
 - 多格式支持（JSONL, CSV, Parquet, Pickle）
-- 步骤化数据处理
-- 自动缓存管理
-- 批量数据操作
+- 数据压缩和验证功能
+- 流式处理大文件
+- 完整性检查和元数据管理
 
 ### 🔧 [工具函数 (xutils)](xutils.md)
 通用工具函数和令牌计数功能。
@@ -152,8 +153,9 @@ api_config = config_loader.get_api_config()
 
 ```
 工具层内部依赖：
-xerror_handler → xlogger  # 错误处理依赖日志系统
-xutils → xlogger         # 工具函数依赖日志系统
+
+xstorage → xerror_handler → xlogger    # 存储系统依赖错误处理和日志
+xutils → xlogger                       # 工具函数依赖日志系统
 
 外部依赖：
 - PyYAML (配置管理)
@@ -167,6 +169,8 @@ xutils → xlogger         # 工具函数依赖日志系统
   - 初始版本
   - 实现基础的异常处理、日志、配置、存储功能
   - 添加令牌计数工具函数
+  - 完善存储系统（压缩、验证、流式处理）
+
 
 ---
 

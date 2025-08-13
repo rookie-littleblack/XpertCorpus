@@ -158,6 +158,11 @@ nav:
       - 配置管理: api/utils/xconfig.md
       - 存储管理: api/utils/xstorage.md
       - 工具函数: api/utils/xutils.md
+    - 基础设施层:
+      - api/others/README.md
+      - 框架基础系统: api/others/xframework.md
+      - 操作符基类: api/others/xoperator.md
+      - 注册系统: api/others/xregistry.md
     - 微操作层:
       - api/microops/README.md
     - 算子层:
@@ -166,6 +171,7 @@ nav:
       - api/pipelines/README.md
     - 框架层:
       - api/frameworks/README.md
+      - 预训练框架: api/frameworks/xframe_pt.md
   - 架构设计:
     - architecture/README.md
     - 设计原则: architecture/design-principles.md
