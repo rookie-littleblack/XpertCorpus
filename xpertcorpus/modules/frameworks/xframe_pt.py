@@ -12,15 +12,13 @@ Usage:
 """
 import os
 import json
+
 from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
-
-from xpertcorpus.utils.xlogger import xlogger
-from xpertcorpus.utils.xerror_handler import error_handler, safe_execute
-from xpertcorpus.utils.xutils import count_tokens
+from xpertcorpus.utils import xlogger, error_handler, safe_execute, count_tokens
 from xpertcorpus.modules.operators import XTextSplitter, XLlmCleaner
 from xpertcorpus.modules.others.xlimitor import XLimitor
-from xpertcorpus.modules.others.xframework import FrameworkABC, FrameworkType, register_framework
+from xpertcorpus.modules.others.xframework import FrameworkABC, FrameworkType, FrameworkState, register_framework
 from xpertcorpus.modules.pipelines.xcleaning_pipe import XCleaningPipe
 
 
@@ -36,6 +34,38 @@ class XFramework_PT(FrameworkABC):
     - Intelligent text splitting
     - Token usage tracking
     - Error handling and recovery
+    - Automatic state management (auto-prepare when needed)
+    
+    Usage:
+        # Simple usage (recommended)
+        framework = XFramework_PT(
+            input_file="./data/corpus.jsonl", 
+            output_dir="./output",
+            max_workers=4
+        )
+        results = framework.run()  # Automatically prepares and executes
+        
+        # With custom configuration
+        config = {
+            "text_splitter": {"chunk_size": 1024, "chunk_overlap": 100},
+            "llm_cleaner": {"enable_token_tracking": True}
+        }
+        framework = XFramework_PT(..., config=config)
+        results = framework.run()
+        
+        # Manual lifecycle management
+        framework = XFramework_PT(...)
+        framework.prepare()  # Manually prepare components
+        results = framework.run()  # Execute pipeline
+        
+    Processing Pipeline:
+        1. Input validation and raw corpus detection
+        2. Optional: Raw corpus preprocessing (txt/md → jsonl)
+        3. Data limiting (if configured)
+        4. LLM-based content cleaning
+        5. Multi-stage cleaning pipeline
+        6. Intelligent text splitting
+        7. Result aggregation and storage
     """
     
     # Framework metadata
@@ -54,11 +84,19 @@ class XFramework_PT(FrameworkABC):
         Initialize the XFramework_PT.
 
         Args:
-            input_file: The input file or directory path
-            output_dir: The output directory path
-            max_workers: The number of workers
-            limit: The number of limit, 0 means no limit
-            config: Optional configuration dictionary
+            input_file: The input file or directory path. Can be:
+                       - JSONL file with 'raw_content' field (processed corpus)
+                       - Directory with .txt/.md files (raw corpus)
+            output_dir: The output directory path. If default "./output",
+                       will create timestamped subdirectory
+            max_workers: The number of worker threads for parallel processing
+            limit: The number of records to process, 0 means no limit
+            config: Optional configuration dictionary to override defaults.
+                   See class docstring for configuration examples.
+                   
+        Note:
+            Framework starts in INITIALIZED state. Call run() to automatically
+            prepare and execute, or call prepare() manually for explicit control.
         """
         # Set default configuration
         default_config = {
@@ -399,15 +437,29 @@ class XFramework_PT(FrameworkABC):
         """
         Legacy forward method for backward compatibility.
         
+        Automatically handles framework preparation based on current state:
+        - INITIALIZED: Calls prepare() then run()
+        - CONFIGURED: Calls run() directly
+        - Other states: Raises ValueError
+        
         Returns:
             Pipeline execution results
+            
+        Note:
+            This method is deprecated. Use run() method instead for better
+            state management and clearer semantics.
         """
         xlogger.warning("Using legacy forward() method. Consider using run() instead.")
         
         try:
             # Prepare if not already prepared
-            if self.state.value in ["INITIALIZED", "CONFIGURED"]:
+            if self.state == FrameworkState.INITIALIZED:
                 self.prepare()
+            elif self.state == FrameworkState.CONFIGURED:
+                # Already configured, can proceed directly
+                pass
+            else:
+                raise ValueError(f"Framework cannot run in current state: {self.state}")
             
             # Execute pipeline
             return self.run()

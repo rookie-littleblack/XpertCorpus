@@ -26,6 +26,29 @@ class FrameworkState(Enum):
     PAUSED = "PAUSED"             # 已暂停
 ```
 
+#### 状态详细说明
+
+| 状态 | 含义 | 进入时机 | 可用操作 |
+|------|------|----------|----------|
+| **INITIALIZED** | 🚀 框架刚初始化完成 | `__init__()` 完成后 | `prepare()`, `configure()`, `run()` (自动准备) |
+| **CONFIGURED** | ✅ 组件已准备好，可运行 | `prepare()` 成功完成后 | `run()`, 重新 `prepare()` |
+| **PREPARING** | ⚙️ 正在准备组件 | `prepare()` 执行过程中 | 内部状态，用户不应干预 |
+| **RUNNING** | 🏃 正在执行管道 | `run()` 执行过程中 | `pause()`, `stop()` |
+| **COMPLETED** | 🎉 执行成功完成 | `run()` 成功结束后 | 查看结果, 重新 `prepare()` |
+| **FAILED** | ❌ 执行失败 | 任何阶段出错后 | `reset()` 重新开始 |
+| **STOPPED** | ⏹️ 用户主动停止 | 调用 `stop()` 后 | `reset()`, `resume()` |
+| **PAUSED** | ⏸️ 暂停执行 | 调用 `pause()` 后 | `resume()` 继续执行 |
+
+#### 状态转换流程
+
+```
+INITIALIZED → prepare() → CONFIGURED → run() → RUNNING → COMPLETED/FAILED
+     ↑                         ↑                            ↓
+     └─────── reset() ←────────────────────────── ──────────┘
+     
+自动模式：INITIALIZED → run() (自动调用prepare()) → CONFIGURED → RUNNING → COMPLETED/FAILED
+```
+
 ### FrameworkType
 
 框架类型枚举。
@@ -150,25 +173,43 @@ def add_hook(self, event: str, callback: callable) -> 'FrameworkABC':
 
 ```python
 def prepare(self) -> 'FrameworkABC':
-    """准备框架执行"""
+    """
+    准备框架执行，初始化所有必要组件。
+    可从 INITIALIZED 或 CONFIGURED 状态调用。
+    """
     
 def run(self) -> Dict[str, Any]:
-    """执行框架管道"""
+    """
+    执行框架管道。
+    
+    智能状态管理：
+    - INITIALIZED 状态：自动调用 prepare() 然后执行
+    - CONFIGURED 状态：直接执行
+    - 其他状态：抛出异常
+    
+    Returns:
+        Dict: 包含管道执行结果的字典
+    """
     
 def forward(self) -> Dict[str, Any]:
-    """run() 方法的别名，用于向后兼容"""
+    """
+    run() 方法的向后兼容版本。
+    
+    注意：此方法已弃用，建议使用 run() 方法。
+    提供与 run() 相同的智能状态管理功能。
+    """
     
 def pause(self) -> 'FrameworkABC':
-    """暂停执行"""
+    """暂停执行（仅在 RUNNING 状态可用）"""
     
 def resume(self) -> 'FrameworkABC':
-    """恢复执行"""
+    """恢复执行（仅在 PAUSED 状态可用）"""
     
 def stop(self) -> 'FrameworkABC':
     """停止执行"""
     
 def reset(self) -> 'FrameworkABC':
-    """重置框架状态"""
+    """重置框架到初始状态"""
 ```
 
 #### 信息获取方法
@@ -262,13 +303,66 @@ class CustomFramework(FrameworkABC):
     
     def get_desc(self, lang="zh"):
         return "自定义处理框架"
+```
 
-# 使用框架
+### 框架使用方式
+
+#### 方式一：简单使用（推荐）
+
+```python
+# 最简单的使用方式 - 自动状态管理
 framework = CustomFramework(
     input_file="input.jsonl",
     output_dir="./output"
 )
-results = framework.prepare().run()
+results = framework.run()  # 自动调用 prepare() 然后执行
+```
+
+#### 方式二：手动控制
+
+```python
+# 手动控制生命周期
+framework = CustomFramework(
+    input_file="input.jsonl",
+    output_dir="./output"
+)
+framework.prepare()  # 手动准备组件
+results = framework.run()  # 执行管道
+```
+
+#### 方式三：配置驱动
+
+```python
+# 带配置的使用方式
+config = {
+    "custom_setting": "value",
+    "batch_size": 100
+}
+framework = CustomFramework(
+    input_file="input.jsonl",
+    output_dir="./output",
+    config=config
+)
+results = framework.run()
+```
+
+#### 方式四：生命周期监控
+
+```python
+# 状态监控和错误处理
+framework = CustomFramework(input_file="input.jsonl")
+
+# 添加生命周期钩子
+framework.add_hook("before_run", lambda fw: print("开始执行"))
+framework.add_hook("on_complete", lambda fw: print("执行完成"))
+
+try:
+    results = framework.run()
+    print(f"框架状态: {framework.get_state()}")
+    print(f"性能指标: {framework.get_metrics()}")
+except Exception as e:
+    print(f"执行失败: {e}")
+    framework.reset()  # 重置状态
 ```
 
 ### 框架管理器使用
@@ -297,6 +391,75 @@ framework = FrameworkManager.create_framework(
 - `operators`: 已注册算子字典
 - `pipelines`: 已注册管道字典
 - `storage`: 存储实例
+
+## 最佳实践
+
+### 1. 优先使用 run() 方法
+
+```python
+# ✅ 推荐：简单直接
+framework = MyFramework(input_file="data.jsonl")
+results = framework.run()
+
+# ❌ 不推荐：过度复杂
+framework = MyFramework(input_file="data.jsonl")
+framework.prepare()
+results = framework.run()
+```
+
+### 2. 合理使用配置
+
+```python
+# ✅ 推荐：配置驱动
+config = {
+    "batch_size": 100,
+    "enable_cache": True
+}
+framework = MyFramework(input_file="data.jsonl", config=config)
+
+# ❌ 不推荐：硬编码
+framework = MyFramework(input_file="data.jsonl")
+framework.batch_size = 100  # 直接修改属性
+```
+
+### 3. 适当的错误处理
+
+```python
+# ✅ 推荐：优雅的错误处理
+try:
+    results = framework.run()
+except Exception as e:
+    logger.error(f"Framework execution failed: {e}")
+    framework.reset()  # 重置状态以便重试
+```
+
+### 4. 监控执行状态
+
+```python
+# ✅ 推荐：状态监控
+framework.add_hook("on_complete", lambda fw: 
+    print(f"处理完成，耗时: {fw.get_metrics()['total_processing_time']:.2f}s"))
+```
+
+## 注意事项
+
+### 状态管理
+
+- **自动准备**：`run()` 方法会在 `INITIALIZED` 状态自动调用 `prepare()`
+- **重复准备**：在 `CONFIGURED` 状态可以重新调用 `prepare()` 重新配置组件
+- **状态检查**：使用 `get_state()` 检查当前状态，避免在错误状态下调用方法
+
+### 性能优化
+
+- **避免重复准备**：已经是 `CONFIGURED` 状态时，`run()` 不会重复调用 `prepare()`
+- **合理设置工作线程**：根据 CPU 核心数和任务特性设置 `max_workers`
+- **监控指标**：使用 `get_metrics()` 监控性能指标
+
+### 错误恢复
+
+- **状态重置**：出错后使用 `reset()` 重置到初始状态
+- **钩子清理**：在钩子函数中进行必要的资源清理
+- **异常传播**：框架会适当传播异常，便于上层处理
 
 ## 相关文档
 

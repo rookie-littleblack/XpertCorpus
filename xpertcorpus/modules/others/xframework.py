@@ -4,6 +4,14 @@ Framework abstract base class for XpertCorpus.
 This module defines the core framework interface and provides utilities for
 framework lifecycle management, configuration, and data processing pipelines.
 
+Key Features:
+- Automatic state management with smart run() method
+- Flexible lifecycle hooks for custom event handling
+- Component registration and management system
+- Comprehensive error handling and recovery
+- Performance metrics and monitoring
+- Configuration-driven behavior
+
 @author: rookielittleblack
 @date:   2025-08-13
 """
@@ -15,14 +23,28 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union, Type
 from pathlib import Path
 from datetime import datetime
-from xpertcorpus.utils.xlogger import xlogger
-from xpertcorpus.utils.xerror_handler import error_handler, safe_execute
-from xpertcorpus.utils.xstorage import FileStorage
+from xpertcorpus.utils import xlogger, error_handler, safe_execute, FileStorage
 from xpertcorpus.modules.others.xoperator import OperatorABC
 
 
 class FrameworkState(Enum):
-    """Framework lifecycle states."""
+    """
+    Framework lifecycle states.
+    
+    State Details:
+    ┌─────────────┬─────────────────────────────┬──────────────────────┬─────────────────────────┐
+    │ State       │ Meaning                     │ When Entered         │ Available Actions       │
+    ├─────────────┼─────────────────────────────┼──────────────────────┼─────────────────────────┤
+    │ INITIALIZED │ 🚀 Framework initialized    │ After __init__()     │ prepare(), configure()  │
+    │ CONFIGURED  │ ✅ Ready to run             │ After prepare()      │ run(), prepare() again  │
+    │ PREPARING   │ ⚙️ Preparing components     │ During prepare()     │ Internal state only     │
+    │ RUNNING     │ 🏃 Executing pipeline       │ During run()         │ pause(), stop()         │
+    │ COMPLETED   │ 🎉 Execution successful     │ After run() success  │ View results, prepare() │
+    │ FAILED      │ ❌ Execution failed         │ After any error      │ reset(), prepare()      │
+    │ STOPPED     │ ⏹️ User stopped execution   │ After stop()         │ reset(), resume()       │
+    │ PAUSED      │ ⏸️ Execution paused         │ After pause()        │ resume(), stop()        │
+    └─────────────┴─────────────────────────────┴──────────────────────┴─────────────────────────┘
+    """
     INITIALIZED = "INITIALIZED"
     CONFIGURED = "CONFIGURED"
     PREPARING = "PREPARING"
@@ -48,6 +70,31 @@ class FrameworkABC(ABC):
     
     Provides standardized interface for data processing frameworks with
     lifecycle management, configuration, and pipeline execution.
+    
+    Framework States:
+        INITIALIZED: Framework has been initialized but not prepared
+        CONFIGURED: Components are prepared and ready to run
+        PREPARING: Currently preparing components (internal state)
+        RUNNING: Pipeline is currently executing
+        COMPLETED: Execution completed successfully
+        FAILED: Execution failed due to an error
+        STOPPED: User manually stopped execution
+        PAUSED: Execution temporarily paused
+    
+    Usage:
+        # Simple usage (auto-prepare)
+        framework = MyFramework(input_file="data.jsonl", output_dir="./output")
+        results = framework.run()  # Automatically prepares if needed
+        
+        # Manual lifecycle management
+        framework = MyFramework(input_file="data.jsonl", output_dir="./output")
+        framework.prepare()  # Manually prepare components
+        results = framework.run()  # Execute pipeline
+        
+    State Transitions:
+        INITIALIZED → prepare() → CONFIGURED → run() → RUNNING → COMPLETED/FAILED
+                           ↑                                        ↓
+                           └──────── reset() ←─────────────────────┘
     """
     
     # Framework metadata
@@ -349,10 +396,28 @@ class FrameworkABC(ABC):
     
     @safe_execute(fallback_value=None, retry_enabled=False)
     def run(self) -> Dict[str, Any]:
-        """Execute the complete framework pipeline."""
+        """
+        Execute the complete framework pipeline.
+        
+        Automatically prepares the framework if it's in INITIALIZED state.
+        For CONFIGURED state, executes directly without re-preparation.
+        
+        Returns:
+            Dict containing pipeline execution results
+            
+        Raises:
+            ValueError: If framework is in an invalid state for execution
+        """
         try:
-            if self.state != FrameworkState.CONFIGURED:
-                raise ValueError(f"Framework must be prepared before running. Current state: {self.state}")
+            # Auto-prepare if needed
+            if self.state == FrameworkState.INITIALIZED:
+                xlogger.info("Framework not prepared, auto-preparing...")
+                self.prepare()
+            elif self.state == FrameworkState.CONFIGURED:
+                # Already configured, can proceed directly
+                pass
+            else:
+                raise ValueError(f"Framework cannot run in current state: {self.state}. Expected INITIALIZED or CONFIGURED.")
             
             # Setup execution
             self.state = FrameworkState.RUNNING

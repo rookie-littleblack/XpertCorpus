@@ -13,6 +13,8 @@ XFramework_PT 是 XpertCorpus 的核心框架之一，专门用于处理原始�
 - **🔄 多阶段管道** - 清洗、过滤、分割的完整处理流程
 - **📊 质量保证** - 内置数据验证和质量检测
 - **⚡ 高性能处理** - 多线程并发和流式处理支持
+- **🧠 智能状态管理** - 自动状态检测和管道准备
+- **🔧 配置驱动** - 灵活的配置系统和组件管理
 
 ## 类定义
 
@@ -162,6 +164,11 @@ def run(self) -> Dict[str, Any]:
     """
     执行预训练数据生成流程。
     
+    智能状态管理：
+    - INITIALIZED 状态：自动调用 prepare() 然后执行
+    - CONFIGURED 状态：直接执行，无需重复准备
+    - 其他状态：抛出 ValueError
+    
     处理步骤：
     1. 数据限制（如果配置）
     2. LLM文本清洗
@@ -180,7 +187,7 @@ def run(self) -> Dict[str, Any]:
     
     Raises:
         FileNotFoundError: 输入文件不存在
-        ValueError: 输入文件格式不正确
+        ValueError: 输入文件格式不正确或状态无效
     """
 ```
 
@@ -235,7 +242,13 @@ def forward(self) -> Dict[str, Any]:
     """
     传统的执行方法，保持向后兼容性。
     
-    注意：此方法已弃用，建议使用 run() 方法。
+    自动状态管理：
+    - INITIALIZED 状态：调用 prepare() 然后 run()
+    - CONFIGURED 状态：直接调用 run()
+    - 其他状态：抛出 ValueError
+    
+    注意：此方法已弃用，建议使用 run() 方法获得更好的
+          状态管理和更清晰的语义。
     
     Returns:
         管道执行结果
@@ -244,20 +257,40 @@ def forward(self) -> Dict[str, Any]:
 
 ## 使用示例
 
-### 基本使用
+### 基本使用（推荐）
 
 ```python
 from xpertcorpus.modules.frameworks import XFramework_PT
 
-# 创建框架实例
+# 最简单的使用方式 - 自动状态管理
 framework = XFramework_PT(
     input_file="./corpus_directory",
     output_dir="./output",
     max_workers=2
 )
 
-# 准备和执行
+# 一键执行 - 自动准备和运行
+results = framework.run()  # 自动调用 prepare() 然后执行
+
+print(f"处理完成！输出路径: {results['output_path']}")
+```
+
+### 手动控制（可选）
+
+```python
+from xpertcorpus.modules.frameworks import XFramework_PT
+
+# 手动控制生命周期
+framework = XFramework_PT(
+    input_file="./corpus_directory",
+    output_dir="./output",
+    max_workers=2
+)
+
+# 手动准备组件
 framework.prepare()
+
+# 执行处理管道
 results = framework.run()
 
 print(f"处理完成！输出路径: {results['output_path']}")
@@ -451,11 +484,39 @@ framework = XFramework_PT(
     input_file="very_large_corpus/",
     config=config
 )
+results = framework.run()  # 一键执行
 ```
 
 ## 最佳实践
 
-### 1. 输入数据准备
+### 1. 状态管理最佳实践
+
+```python
+# ✅ 推荐：简单直接的使用方式
+framework = XFramework_PT(input_file="data.jsonl")
+results = framework.run()  # 自动处理状态
+
+# ✅ 推荐：监控状态变化
+framework = XFramework_PT(input_file="data.jsonl")
+print(f"初始状态: {framework.get_state()}")  # INITIALIZED
+results = framework.run()  # 自动 prepare() → CONFIGURED → RUNNING → COMPLETED
+print(f"最终状态: {framework.get_state()}")  # COMPLETED
+
+# ❌ 不推荐：手动管理简单情况
+framework = XFramework_PT(input_file="data.jsonl")
+framework.prepare()  # 对于简单使用是多余的
+results = framework.run()
+
+# ✅ 推荐：错误处理和状态重置
+try:
+    results = framework.run()
+except Exception as e:
+    print(f"执行失败: {e}")
+    framework.reset()  # 重置到 INITIALIZED 状态
+    # 可以重新尝试或修改配置
+```
+
+### 2. 输入数据准备
 
 ```python
 # 检查输入数据质量

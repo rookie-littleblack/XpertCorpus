@@ -9,8 +9,8 @@ Usage:
 """
 import argparse
 
+from xpertcorpus.utils import xlogger
 from xpertcorpus.modules.frameworks.xframe_pt import XFramework_PT
-
 
 def main():
     # Parse arguments
@@ -21,16 +21,20 @@ def main():
     parser.add_argument("--limit", "-l", type=int, default=0, help="The number of limit, 0 means no limit.")
     args = parser.parse_args()
 
-    # Initialize pipeline
-    pipeline = XFramework_PT(
+    # Initialize framework
+    framework = XFramework_PT(
         input_file=args.input,
         output_dir=args.output,
         max_workers=args.max_workers,
         limit=args.limit
     )
 
-    # Run pipeline
-    pipeline.forward()
+    # Run framework
+    framework.run()
+
+    # Get framework info
+    framework_info = framework.get_pipeline_info()
+    xlogger.debug(f"framework_info: {framework_info}")
 
 
 if __name__ == "__main__":
