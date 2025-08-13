@@ -33,8 +33,7 @@ def main():
     framework.run()
 
     # Get framework info
-    framework_info = framework.get_pipeline_info()
-    xlogger.debug(f"framework_info: {framework_info}")
+    xlogger.debug(f"framework_info: {framework.get_pipeline_info()}")
 
 
 if __name__ == "__main__":
