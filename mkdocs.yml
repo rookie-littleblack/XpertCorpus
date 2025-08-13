@@ -161,14 +161,17 @@ nav:
     - 基础设施层:
       - api/others/README.md
       - 框架基础系统: api/others/xframework.md
+      - 管道基础系统: api/others/xpipeline.md
       - 算子基类: api/others/xoperator.md
       - 注册系统: api/others/xregistry.md
+      - 数据限制器: api/others/xlimitor.md
     - 微操作层:
       - api/microops/README.md
     - 算子层:
       - api/operators/README.md
     - 管道层:
       - api/pipelines/README.md
+      - 文本清洗管道: api/pipelines/xcleaning_pipe.md
     - 框架层:
       - api/frameworks/README.md
       - 预训练框架: api/frameworks/xframe_pt.md
