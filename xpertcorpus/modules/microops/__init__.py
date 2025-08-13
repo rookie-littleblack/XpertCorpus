@@ -9,13 +9,12 @@ All classes can be imported directly from this module.
 """
 from .remove_emoticons_microops import RemoveEmoticonsMicroops
 from .remove_emoji_microops import RemoveEmojiMicroops
+from .remove_extra_spaces_microops import RemoveExtraSpacesMicroops
 
-# Version information
-__version__ = '1.0.0'
-__author__ = 'rookielittleblack' 
 
 # Export all classes for easy importing
 __all__ = [
     'RemoveEmoticonsMicroops',
-    'RemoveEmojiMicroops',
+    'RemoveEmojiMicroops', 
+    'RemoveExtraSpacesMicroops',
 ]

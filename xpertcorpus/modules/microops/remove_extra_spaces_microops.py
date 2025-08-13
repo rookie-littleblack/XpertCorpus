@@ -5,93 +5,162 @@ Micro-ops: remove extra spaces
 @date:   2025-08-12
 """
 import re
+from typing import Dict, Any, Optional, List, Tuple
 
 from xpertcorpus.utils import xlogger
+from xpertcorpus.utils.xerror_handler import XErrorHandler, XRetryMechanism
 from xpertcorpus.modules.others.xoperator import OperatorABC, register_operator
 
 
 @register_operator("remove_extra_spaces")
 class RemoveExtraSpacesMicroops(OperatorABC):
-    def __init__(self):
-        xlogger.info(f"Initializing {self.__class__.__name__} ...")
+    """
+    Enhanced extra spaces removal micro-operation with performance optimization
+    and unified error handling.
+    
+    Optimizations:
+    - Integrated unified error handling system
+    - Improved code block detection performance
+    - Added configuration parameters support
+    - Better regex patterns compilation and caching
+    - Enhanced processing logic with validation
+    """
+    
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """
+        Initialize the spaces removal micro-operation.
         
-        # 代码块检测的正则表达式
+        Args:
+            config: Configuration dictionary with optional parameters:
+                - max_indent_preservation: Maximum indentation to preserve (default: 4)
+                - code_detection_threshold: Threshold for code detection (default: 0.3)
+                - preserve_code_blocks: Whether to preserve code blocks (default: True)
+                - remove_trailing_spaces: Whether to remove trailing spaces (default: True)
+        """
+        super().__init__(config)
+        self.error_handler = XErrorHandler()
+        self.retry_mechanism = XRetryMechanism(max_retries=2, base_delay=0.1)
+        
+        # Configuration parameters
+        self.max_indent_preservation = self.config.get('max_indent_preservation', 4)
+        self.code_detection_threshold = self.config.get('code_detection_threshold', 0.3)
+        self.preserve_code_blocks = self.config.get('preserve_code_blocks', True)
+        self.remove_trailing_spaces = self.config.get('remove_trailing_spaces', True)
+        
+        xlogger.info(f"Initializing {self.__class__.__name__} with config: {self.config}")
+        
+        # Pre-compiled regex patterns for better performance
+        self._compile_patterns()
+
+    def _compile_patterns(self) -> None:
+        """Compile and cache regex patterns for better performance."""
+        # Code block detection patterns
         self.code_patterns = [
-            # 围栏式代码块（```或~~~开头结尾）
+            # Fenced code blocks (``` or ~~~ delimited)
             re.compile(r'```[\s\S]*?```', re.MULTILINE),
             re.compile(r'~~~[\s\S]*?~~~', re.MULTILINE),
-            # 缩进代码块（连续4个或以上空格开头的行）
+            # Indented code blocks (4+ spaces at line start)
             re.compile(r'^[ \t]{4,}.*$', re.MULTILINE),
-            # 行内代码（单反引号包围）
+            # Inline code (single backticks)
             re.compile(r'`[^`\n]+`'),
-            # HTML pre标签
+            # HTML pre/code tags
             re.compile(r'<pre[\s\S]*?</pre>', re.IGNORECASE),
             re.compile(r'<code[\s\S]*?</code>', re.IGNORECASE),
-            # 常见编程语言的函数定义模式
+            # Common programming language patterns
             re.compile(r'^(def|function|class|public|private|protected)\s+\w+', re.MULTILINE),
-            # 包含特殊编程字符的行
+            # Lines with programming characters
             re.compile(r'.*[{}();=><\[\]]+.*', re.MULTILINE),
         ]
+        
+        # Text cleaning patterns
+        self.cleanup_patterns = {
+            'carriage_return': re.compile(r'\r'),
+            'multiple_newlines': re.compile(r'\n{3,}'),
+            'multiple_spaces': re.compile(r' {2,}'),
+            'trailing_spaces': re.compile(r' +$', re.MULTILINE),
+            'mixed_whitespace': re.compile(r'[ \t]+'),
+        }
+        
+        # Code detection keywords (compiled for faster lookup)
+        self.code_keywords = {
+            'def ', 'function ', 'class ', 'import ', 'from ', 'return ', 
+            'if ', 'else:', 'for ', 'while ', 'try:', 'except:', 'var ',
+            'let ', 'const ', 'public ', 'private ', 'protected '
+        }
 
     @staticmethod
-    def get_desc(lang: str = "zh"):
-        return "去除文本中的多余空格和换行符" if lang == "zh" else "Remove extra spaces and newlines in the text."
+    def get_desc(lang: str = "zh") -> str:
+        """Get description of the micro-operation."""
+        return (
+            "智能移除文本中的多余空格和换行符，保护代码块格式" 
+            if lang == "zh" 
+            else "Intelligently remove extra spaces and newlines while preserving code blocks."
+        )
     
     def _is_likely_code(self, text: str) -> bool:
         """
-        检测文本是否可能是代码
+        Enhanced code detection with better performance.
+        
+        Args:
+            text: Text to analyze
+            
+        Returns:
+            bool: True if text is likely code
         """
         if not text.strip():
             return False
             
-        # 检查是否匹配代码模式
+        # Quick pattern matching first
         for pattern in self.code_patterns:
             if pattern.search(text):
                 return True
         
-        # 统计代码特征
-        lines = text.split('\n')
-        code_indicators = 0
-        total_lines = len([line for line in lines if line.strip()])
-        
-        if total_lines == 0:
+        # Statistical analysis for borderline cases
+        lines = [line.strip() for line in text.split('\n') if line.strip()]
+        if not lines:
             return False
         
+        code_indicators = 0
+        total_lines = len(lines)
+        
         for line in lines:
-            line = line.strip()
-            if not line:
+            # Check for programming keywords (optimized with set lookup)
+            if any(keyword in line.lower() for keyword in self.code_keywords):
+                code_indicators += 1
                 continue
                 
-            # 检查代码特征
+            # Check for other code patterns
             if any([
-                # 包含常见编程关键字
-                any(keyword in line.lower() for keyword in ['def ', 'function ', 'class ', 'import ', 'from ', 'return ', 'if ', 'else:', 'for ', 'while ', 'try:', 'except:']),
-                # 包含赋值操作
-                ' = ' in line and not line.startswith('#'),
-                # 包含括号和分号
-                line.count('(') + line.count(')') >= 2,
-                line.endswith(';') or line.endswith('{') or line.endswith('}'),
-                # 缩进模式（4个或以上空格）
-                line.startswith('    ') and len(line) > 4,
-                # 包含特殊字符组合
-                '->' in line or '=>' in line or '::' in line,
+                ' = ' in line and not line.startswith('#'),  # Assignment
+                line.count('(') + line.count(')') >= 2,      # Function calls
+                line.endswith(';') or line.endswith('{') or line.endswith('}'),  # Syntax
+                line.startswith('    ') and len(line) > 4,   # Indentation
+                '->' in line or '=>' in line or '::' in line # Language specific
             ]):
                 code_indicators += 1
         
-        # 如果超过30%的行具有代码特征，认为是代码
-        return (code_indicators / total_lines) > 0.3
+        return (code_indicators / total_lines) > self.code_detection_threshold
     
-    def _preserve_code_blocks(self, text: str):
+    def _preserve_code_blocks(self, text: str) -> Tuple[str, List[str], str]:
         """
-        保护代码块，返回处理后的文本和代码块位置信息
+        Preserve code blocks during processing.
+        
+        Args:
+            text: Input text
+            
+        Returns:
+            Tuple of (processed_text, code_blocks, placeholder_pattern)
         """
+        if not self.preserve_code_blocks:
+            return text, [], ""
+            
         code_blocks = []
         placeholder_pattern = "___CODE_BLOCK_PLACEHOLDER_{}_END___"
         
-        # 提取所有代码块
-        for i, pattern in enumerate(self.code_patterns):
+        # Extract all code blocks (process in reverse to avoid index shifting)
+        for pattern in self.code_patterns:
             matches = list(pattern.finditer(text))
-            for match in reversed(matches):  # 反向处理避免位置偏移
+            for match in reversed(matches):
                 code_content = match.group()
                 placeholder = placeholder_pattern.format(len(code_blocks))
                 code_blocks.append(code_content)
@@ -99,88 +168,139 @@ class RemoveExtraSpacesMicroops(OperatorABC):
         
         return text, code_blocks, placeholder_pattern
     
-    def _restore_code_blocks(self, text: str, code_blocks: list, placeholder_pattern: str):
+    def _restore_code_blocks(self, text: str, code_blocks: List[str], placeholder_pattern: str) -> str:
         """
-        恢复代码块
+        Restore preserved code blocks.
+        
+        Args:
+            text: Text with placeholders
+            code_blocks: List of preserved code blocks
+            placeholder_pattern: Pattern used for placeholders
+            
+        Returns:
+            Text with restored code blocks
         """
         for i, code_block in enumerate(code_blocks):
             placeholder = placeholder_pattern.format(i)
             text = text.replace(placeholder, code_block)
         return text
     
-    def run(self, input_string: str):
+    def _clean_text_content(self, text: str) -> str:
+        """
+        Clean text content with improved logic.
+        
+        Args:
+            text: Text to clean
+            
+        Returns:
+            Cleaned text
+        """
+        # Step 1: Remove carriage returns
+        text = self.cleanup_patterns['carriage_return'].sub('', text)
+        
+        # Step 2: Normalize multiple newlines
+        text = self.cleanup_patterns['multiple_newlines'].sub('\n\n', text)
+        
+        # Step 3: Process paragraphs individually
+        paragraphs = text.split('\n\n')
+        processed_paragraphs = []
+        
+        for paragraph in paragraphs:
+            if not paragraph.strip():
+                processed_paragraphs.append(paragraph)
+                continue
+                
+            # Check if paragraph contains code
+            if self._is_likely_code(paragraph):
+                # Preserve code formatting
+                processed_paragraphs.append(paragraph)
+            else:
+                # Clean regular text
+                lines = paragraph.split('\n')
+                processed_lines = []
+                
+                for line in lines:
+                    if not line.strip():
+                        processed_lines.append(line)
+                        continue
+                        
+                    # Preserve reasonable indentation
+                    leading_spaces = len(line) - len(line.lstrip())
+                    content = line.strip()
+                    
+                    if content:
+                        # Clean multiple spaces in content
+                        cleaned_content = self.cleanup_patterns['multiple_spaces'].sub(' ', content)
+                        
+                        # Reconstruct with preserved indentation
+                        if leading_spaces > 0:
+                            indent = ' ' * min(leading_spaces, self.max_indent_preservation)
+                            processed_line = indent + cleaned_content
+                        else:
+                            processed_line = cleaned_content
+                    else:
+                        processed_line = line
+                    
+                    processed_lines.append(processed_line)
+                
+                processed_paragraphs.append('\n'.join(processed_lines))
+        
+        text = '\n\n'.join(processed_paragraphs)
+        
+        # Step 4: Additional cleanup
+        if self.remove_trailing_spaces:
+            text = self.cleanup_patterns['trailing_spaces'].sub('', text)
+        
+        # Step 5: Normalize mixed whitespace (except in code)
+        # Only apply to non-code segments
+        lines = text.split('\n')
+        for i, line in enumerate(lines):
+            if not self._is_likely_code(line):
+                lines[i] = self.cleanup_patterns['mixed_whitespace'].sub(' ', line)
+        text = '\n'.join(lines)
+        
+        # Step 6: Strip document-level whitespace
+        text = text.strip()
+        
+        return text
+    
+    def run(self, input_string: str) -> str:
+        """
+        Enhanced run method with error handling and performance optimization.
+        
+        Args:
+            input_string: Input text to process
+            
+        Returns:
+            Processed text with extra spaces removed
+        """
         if not input_string:
             return input_string
 
-        try:
-            # 保护代码块
+        def _process_text() -> str:
+            # Step 1: Preserve code blocks
             output_string, code_blocks, placeholder_pattern = self._preserve_code_blocks(input_string)
             
-            # 1. 移除\r字符
-            output_string = output_string.replace("\r", "")
+            # Step 2: Clean text content
+            output_string = self._clean_text_content(output_string)
             
-            # 2. 处理连续的换行符：3个或以上的换行符替换为2个
-            output_string = re.sub(r'\n{3,}', '\n\n', output_string)
-            
-            # 3. 处理多余的空格（只在非代码区域）
-            # 分割文本，逐段处理
-            paragraphs = output_string.split('\n\n')
-            processed_paragraphs = []
-            
-            for paragraph in paragraphs:
-                if not paragraph.strip():
-                    processed_paragraphs.append(paragraph)
-                    continue
-                    
-                # 检查该段落是否可能是代码
-                if self._is_likely_code(paragraph):
-                    # 是代码，保持原样
-                    processed_paragraphs.append(paragraph)
-                else:
-                    # 不是代码，清理多余空格
-                    # 将多个连续空格替换为单个空格
-                    lines = paragraph.split('\n')
-                    processed_lines = []
-                    for line in lines:
-                        # 保留行首和行尾，只处理中间的多余空格
-                        leading_spaces = len(line) - len(line.lstrip())
-                        trailing_spaces = len(line) - len(line.rstrip())
-                        content = line.strip()
-                        
-                        if content:
-                            # 将内容中的多个空格替换为单个空格
-                            cleaned_content = re.sub(r' {2,}', ' ', content)
-                            # 重新组装，保留必要的缩进
-                            if leading_spaces > 0:
-                                # 保留合理的缩进（最多4个空格）
-                                indent = ' ' * min(leading_spaces, 4)
-                                processed_line = indent + cleaned_content
-                            else:
-                                processed_line = cleaned_content
-                        else:
-                            processed_line = line
-                        
-                        processed_lines.append(processed_line)
-                    
-                    processed_paragraphs.append('\n'.join(processed_lines))
-            
-            output_string = '\n\n'.join(processed_paragraphs)
-            
-            # 4. 其他文本清理功能
-            # 移除行尾的多余空格
-            output_string = re.sub(r' +$', '', output_string, flags=re.MULTILINE)
-            
-            # 清理制表符和空格的混合（标准化为空格）
-            output_string = re.sub(r'[ \t]+', lambda m: ' ' if not self._is_likely_code(m.group()) else m.group(), output_string)
-            
-            # 移除文档开头和结尾的多余空白
-            output_string = output_string.strip()
-            
-            # 恢复代码块
-            output_string = self._restore_code_blocks(output_string, code_blocks, placeholder_pattern)
+            # Step 3: Restore code blocks
+            if code_blocks:
+                output_string = self._restore_code_blocks(output_string, code_blocks, placeholder_pattern)
             
             return output_string
+
+        try:
+            # Use retry mechanism for processing
+            result = self.retry_mechanism.execute(_process_text)
+            xlogger.debug(f"Successfully processed text: {len(input_string)} -> {len(result)} characters")
+            return result
             
         except Exception as e:
-            xlogger.error(f"Error in removing extra spaces and formatting text: {e}")
-            return input_string
+            error_info = self.error_handler.handle_error(
+                e, 
+                context=f"Processing text with length {len(input_string)}",
+                operation="remove_extra_spaces"
+            )
+            xlogger.error(f"Error in removing extra spaces: {error_info}")
+            return input_string  # Return original on error

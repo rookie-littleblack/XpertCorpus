@@ -5,35 +5,187 @@ Micro-ops: remove emoticons
 @date:   2025-08-12
 """
 import re
+from typing import Dict, Any, Optional
 
 from xpertcorpus.utils import xlogger
+from xpertcorpus.utils.xerror_handler import XErrorHandler, XRetryMechanism
 from xpertcorpus.modules.others.xoperator import OperatorABC, register_operator
 
 
 @register_operator("remove_emoticons")
 class RemoveEmoticonsMicroops(OperatorABC):
-    def __init__(self):
-        xlogger.info(f"Initializing {self.__class__.__name__} ...")
+    """
+    Enhanced emoticons removal micro-operation with performance optimization
+    and unified error handling.
+    
+    Improvements:
+    - Replaced inefficient individual string replacement with regex patterns
+    - Integrated unified error handling system
+    - Added configuration support for replacement behavior
+    - Optimized emoticon detection patterns
+    - Better performance for large texts
+    """
 
-        # Get emoticons
-        self.emoticons = EMOTICONS_EMO.keys()
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """
+        Initialize the emoticons removal micro-operation.
+        
+        Args:
+            config: Configuration dictionary with optional parameters:
+                - replacement_text: Text to replace emoticons with (default: '')
+                - case_sensitive: Whether to use case-sensitive matching (default: False)
+                - preserve_spacing: Whether to preserve original spacing (default: False)
+        """
+        super().__init__(config)
+        self.error_handler = XErrorHandler()
+        self.retry_mechanism = XRetryMechanism(max_retries=2, base_delay=0.1)
+        
+        # Configuration parameters
+        self.replacement_text = self.config.get('replacement_text', '')
+        self.case_sensitive = self.config.get('case_sensitive', False)
+        self.preserve_spacing = self.config.get('preserve_spacing', False)
+        
+        xlogger.info(f"Initializing {self.__class__.__name__} with config: {self.config}")
+        
+        # Compile optimized emoticon patterns
+        self._compile_emoticon_patterns()
+
+    def _compile_emoticon_patterns(self) -> None:
+        """Compile optimized emoticon patterns for better performance."""
+        
+        # Extract emoticons from the dictionary and group by patterns
+        emoticons = list(EMOTICONS_EMO.keys())
+        
+        # Sort by length (descending) to match longer emoticons first
+        emoticons.sort(key=len, reverse=True)
+        
+        # Escape special regex characters and create pattern groups
+        escaped_emoticons = []
+        for emoticon in emoticons:
+            # Escape special regex characters
+            escaped = re.escape(emoticon)
+            escaped_emoticons.append(escaped)
+        
+        # Create a single comprehensive pattern
+        # Group emoticons to optimize pattern matching
+        pattern_str = '|'.join(escaped_emoticons)
+        
+        # Compile the pattern with appropriate flags
+        flags = re.UNICODE
+        if not self.case_sensitive:
+            flags |= re.IGNORECASE
+        
+        self.emoticon_pattern = re.compile(f'({pattern_str})', flags)
+        
+        # Create additional patterns for common emoticon variants
+        self._create_variant_patterns()
+
+    def _create_variant_patterns(self) -> None:
+        """Create patterns for common emoticon variants and edge cases."""
+        
+        # Pattern for basic text emoticons not in the dictionary
+        basic_emoticon_patterns = [
+            # Happy faces
+            r'[:;=8][\'\-]?[)\]}>|D]',
+            # Sad faces  
+            r'[:;=8][\'\-]?[({\[<|]',
+            # Neutral/surprised
+            r'[:;=8][\'\-]?[|oO0]',
+            # Tongue out
+            r'[:;=8][\'\-]?[pP]',
+            # Wink variants
+            r'[;][\'\-]?[)\]}>|D]',
+            # Special cases
+            r'<3',      # Heart
+            r'</3',     # Broken heart
+            r'\\o/',    # Celebration
+            r'o_O|O_o', # Confused
+            r'\^\^',    # Happy eyes
+            r'\^_\^',   # Happy face
+            r'>_<',     # Frustrated
+            r'¯\\_(ツ)_/¯',  # Shrug (Unicode)
+        ]
+        
+        # Compile variant patterns
+        self.variant_patterns = []
+        for pattern in basic_emoticon_patterns:
+            self.variant_patterns.append(
+                re.compile(pattern, re.UNICODE | (0 if self.case_sensitive else re.IGNORECASE))
+            )
 
     @staticmethod
-    def get_desc(lang: str = "zh"):
-        return "去除文本中的表情符号" if lang == "zh" else "Remove emoticons from the text."
+    def get_desc(lang: str = "zh") -> str:
+        """Get description of the micro-operation."""
+        return (
+            "高效移除文本中的表情符号（文本式表情）" 
+            if lang == "zh" 
+            else "Efficiently remove text-based emoticons from text."
+        )
     
-    def run(self, input_string: str):
+    def _remove_emoticons(self, text: str) -> str:
+        """
+        Remove emoticons from text using optimized regex patterns.
+        
+        Args:
+            text: Input text
+            
+        Returns:
+            Text with emoticons removed
+        """
+        # Remove main emoticons using the compiled pattern
+        text = self.emoticon_pattern.sub(self.replacement_text, text)
+        
+        # Remove variant patterns
+        for pattern in self.variant_patterns:
+            text = pattern.sub(self.replacement_text, text)
+        
+        # Clean up spacing if not preserving original spacing
+        if not self.preserve_spacing and self.replacement_text == '':
+            # Remove multiple consecutive spaces
+            text = re.sub(r'\s+', ' ', text)
+            text = text.strip()
+        
+        return text
+    
+    def run(self, input_string: str) -> str:
+        """
+        Enhanced emoticon removal with error handling and performance optimization.
+        
+        Args:
+            input_string: Input text to process
+            
+        Returns:
+            Text with emoticons removed
+        """
         if not input_string:
             return input_string
 
+        def _process_text() -> str:
+            return self._remove_emoticons(input_string)
+
         try:
-            output_string = input_string
-            for emoticon in self.emoticons:
-                output_string = output_string.replace(emoticon, '')
-            return output_string
+            # Use retry mechanism for processing
+            result = self.retry_mechanism.execute(_process_text)
+            
+            # Log processing statistics
+            original_length = len(input_string)
+            processed_length = len(result)
+            if original_length != processed_length:
+                xlogger.debug(
+                    f"Emoticon removal: {original_length} -> {processed_length} characters "
+                    f"({original_length - processed_length} characters removed)"
+                )
+            
+            return result
+            
         except Exception as e:
-            xlogger.error(f"Error removing emoticons and emojis: {e}")
-            return input_string
+            error_info = self.error_handler.handle_error(
+                e,
+                context=f"Processing text with length {len(input_string)}",
+                operation="remove_emoticons"
+            )
+            xlogger.error(f"Error removing emoticons: {error_info}")
+            return input_string  # Return original on error
 
 """
 Emoticons and Emoji data dictonary

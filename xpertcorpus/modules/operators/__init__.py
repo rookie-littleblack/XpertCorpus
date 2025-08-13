@@ -10,9 +10,6 @@ All classes can be imported directly from this module.
 from .xllmcleaner import XLlmCleaner
 from .xsplitter import XTextSplitter
 
-# Version information
-__version__ = '1.0.0'
-__author__ = 'rookielittleblack' 
 
 # Export all classes for easy importing
 __all__ = [
