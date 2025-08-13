@@ -8,7 +8,7 @@ All classes can be imported directly from this module.
 @date:   2025-08-12
 """
 from .xllmcleaner import XLlmCleaner
-from .xplitter import XTextSplitter
+from .xsplitter import XTextSplitter
 
 # Version information
 __version__ = '1.0.0'

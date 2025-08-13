@@ -36,7 +36,7 @@ XpertCorpus 采用四层架构设计，从底层到顶层分别是：
 ### 🎯 [算子层 (Operators)](operators/README.md)
 复合数据处理操作，组合多个微操作实现复杂逻辑。
 
-- **[文本分割器 (xplitter)](operators/xplitter.md)** - 多策略文本分割
+- **[文本分割器 (xsplitter)](operators/xsplitter.md)** - 多策略文本分割
 - **[LLM 清洗器 (xllmcleaner)](operators/xllmcleaner.md)** - 基于大模型的文本清洗
 - **[质量评估器 (xquality_assessor)](operators/xquality_assessor.md)** - 数据质量评估
 - **[内容过滤器 (xcontent_filter)](operators/xcontent_filter.md)** - 智能内容过滤
