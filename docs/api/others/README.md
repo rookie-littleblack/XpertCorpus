@@ -66,9 +66,16 @@ from xpertcorpus.modules.others.xregistry import Registry
 from xpertcorpus.modules.others import (
     FrameworkABC,
     FrameworkManager,
+    FrameworkState,
+    FrameworkType,
+    register_framework,
     OperatorABC,
     OperatorManager,
-    Registry
+    OperatorState,
+    get_operator,
+    Registry,
+    OPERATOR_REGISTRY,
+    create_registry
 )
 ```
 
@@ -115,23 +122,34 @@ class MyFramework(FrameworkABC):
 from xpertcorpus.modules.others.xoperator import OperatorABC
 
 class MyOperator(OperatorABC):
-    def process(self, data):
+    def run(self):
         # 数据处理逻辑
-        return processed_data
+        return "processed_data"
+
+    def get_desc(self, lang: str = "zh") -> str:
+        return "一个自定义操作符"
 ```
 
 ### 3. 组件注册
 ```python
-from xpertcorpus.modules.others.xregistry import Registry
+from xpertcorpus.modules.others.xregistry import create_registry, OPERATOR_REGISTRY
 
-# 创建注册器
-registry = Registry(enable_cache=True, lazy_loading=True)
+# 使用全局注册器
+@OPERATOR_REGISTRY.register
+class MyNewOperator(OperatorABC):
+    # ...
+    pass
+
+# 创建自定义注册器
+custom_registry = create_registry(name="custom_registry")
 
 # 注册组件
-registry.register("my_operator", MyOperator)
+@custom_registry.register
+class MyCustomComponent:
+    pass
 
 # 获取组件
-operator_class = registry.get("my_operator")
+component_class = custom_registry.get("MyCustomComponent")
 ```
 
 ## 版本历史
