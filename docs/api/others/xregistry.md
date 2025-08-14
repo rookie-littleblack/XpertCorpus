@@ -189,7 +189,7 @@ result = operator.run()
 # 注册算子（新的统一方式）
 @register_operator("advanced_operator")
 class AdvancedOperator(OperatorABC):
-    VERSION = "2.0"
+    VERSION = "1.0.0"
     
     def run(self):
         return "Advanced result"

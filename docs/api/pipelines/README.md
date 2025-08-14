@@ -29,7 +29,7 @@ OperatorABC (算子层) - 单一功能实现
 专用于文本清洗的处理管道。
 
 **核心特性：**
-- 集成多种文本清洗微操作
+- 集成多种文本清洗微算子
 - 支持多线程并行处理
 - 表情符号和emoji移除
 - 可配置的处理限制
@@ -310,7 +310,7 @@ extended_config = {
 
 - [管道基类 (xpipeline)](../others/xpipeline.md) - 管道抽象基类文档
 - [算子基类 (xoperator)](../others/xoperator.md) - 算子抽象基类文档
-- [微操作模块 (microops)](../microops/) - 微操作实现文档
+- [微算子模块 (microops)](../microops/) - 微算子实现文档
 - [框架系统 (frameworks)](../frameworks/) - 框架层文档
 
 ---

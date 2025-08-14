@@ -4,11 +4,11 @@
 
 ## 概述
 
-XCleaningPipe 是基于 PipelineABC 构建的文本清洗管道，集成了多种微操作来实现全面的文本清洗功能。该管道支持并行处理，具有良好的性能和可扩展性。
+XCleaningPipe 是基于 PipelineABC 构建的文本清洗管道，集成了多种微算子来实现全面的文本清洗功能。该管道支持并行处理，具有良好的性能和可扩展性。
 
 ### 核心特性
 
-- **🧹 多重清洗**：集成表情符号和emoji清除等多种微操作
+- **🧹 多重清洗**：集成表情符号和emoji清除等多种微算子
 - **⚡ 并行处理**：支持多线程并行处理大量文本数据
 - **🔧 可配置**：支持处理限制和线程数配置
 - **📊 状态管理**：完整的管道生命周期状态跟踪
@@ -48,14 +48,14 @@ def __init__(self,
 #### 核心方法
 
 ##### _configure_operators()
-配置管道中的微操作。
+配置管道中的微算子。
 
 ```python
 def _configure_operators(self) -> None:
     """
-    配置清洗管道的微操作。
+    配置清洗管道的微算子。
     
-    自动添加以下微操作：
+    自动添加以下微算子：
     - RemoveEmoticonsMicroops: 移除表情符号
     - RemoveEmojiMicroops: 移除emoji表情
     """
@@ -84,7 +84,7 @@ def run(self,
     1. 从存储中读取数据框
     2. 应用处理限制（如果设置）
     3. 使用线程池并行处理文本清洗
-    4. 按顺序应用所有配置的微操作
+    4. 按顺序应用所有配置的微算子
     5. 保存清洗后的数据
     6. 返回输出键名
     """
@@ -122,7 +122,7 @@ cleaning_pipe = XCleaningPipe(
 
 # 检查管道状态
 print(f"管道状态: {cleaning_pipe.get_state()}")
-print(f"配置的微操作数量: {len(cleaning_pipe.get_operators())}")
+print(f"配置的微算子数量: {len(cleaning_pipe.get_operators())}")
 
 # 创建存储实例
 storage = XpertCorpusStorage(
@@ -200,7 +200,7 @@ def clean_text(row):
     if not raw_content:
         return raw_content
     
-    # 按顺序应用所有微操作
+    # 按顺序应用所有微算子
     cleaned_text = raw_content
     for operator in self.operators:
         cleaned_text = operator.run(cleaned_text)
@@ -216,7 +216,7 @@ with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
     cleaned_texts = list(executor.map(clean_text, items))
 ```
 
-## 集成的微操作
+## 集成的微算子
 
 ### RemoveEmoticonsMicroops
 - **功能**：移除文本中的表情符号（如 :) :( :D 等）
@@ -244,7 +244,7 @@ with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
 
 ## 扩展性
 
-### 添加新的微操作
+### 添加新的微算子
 
 ```python
 from xpertcorpus.modules.microops import RemoveExtraSpacesMicroops
@@ -253,10 +253,10 @@ class ExtendedCleaningPipe(XCleaningPipe):
     """扩展的清洗管道"""
     
     def _configure_operators(self):
-        # 添加基础微操作
+        # 添加基础微算子
         super()._configure_operators()
         
-        # 添加额外的微操作
+        # 添加额外的微算子
         self.add_operator(RemoveExtraSpacesMicroops())
 ```
 
@@ -267,7 +267,7 @@ class ConfigurableCleaningPipe(XCleaningPipe):
     """可配置的清洗管道"""
     
     def _configure_operators(self):
-        # 根据配置添加微操作
+        # 根据配置添加微算子
         if self.config.get("remove_emoticons", True):
             self.add_operator(RemoveEmoticonsMicroops())
             
@@ -343,7 +343,7 @@ if final_state == PipelineState.FAILED:
 ## 相关文档
 
 - [管道基类 (xpipeline)](../others/xpipeline.md)
-- [微操作模块 (microops)](../microops/)
+- [微算子模块 (microops)](../microops/)
 - [预训练框架 (xframe_pt)](../frameworks/xframe_pt.md)
 
 ---

@@ -143,7 +143,7 @@ class CustomPipeline(PipelineABC):
     
     def _configure_operators(self):
         """配置管道算子"""
-        # 添加多个微操作
+        # 添加多个微算子
         self.add_operator(RemoveEmoticonsMicroops())
         self.add_operator(RemoveEmojiMicroops())
     

@@ -165,7 +165,7 @@ nav:
       - 算子基类: api/others/xoperator.md
       - 注册系统: api/others/xregistry.md
       - 数据限制器: api/others/xlimitor.md
-    - 微操作层:
+    - 微算子层:
       - api/microops/README.md
     - 算子层:
       - api/operators/README.md

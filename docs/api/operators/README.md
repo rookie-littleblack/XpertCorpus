@@ -294,7 +294,7 @@ class EnhancedTextSplitter(XTextSplitter):
 
 ## 相关文档
 
-- [微操作层 (microops)](../microops/) - 微操作文档
+- [微算子层 (microops)](../microops/) - 微算子文档
 - [算子基类 (xoperator)](../others/xoperator.md) - 算子抽象基类文档
 - [管道层 (pipelines)](../pipelines/) - 管道编排文档
 - [框架层 (frameworks)](../frameworks/) - 框架系统文档
