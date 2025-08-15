@@ -241,7 +241,7 @@ def main():
             max_records = st.number_input(
                 "Max Records",
                 min_value=10,
-                max_value=10000,
+                max_value=1000000,
                 value=1000,
                 step=10,
                 help="Maximum total number of records to load from all files"
