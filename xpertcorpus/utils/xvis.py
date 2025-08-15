@@ -461,14 +461,42 @@ def main():
                         reversed_field_names = list(reversed(field_names))
                         
                         # Create tabs with reversed field order
-                        tabs = st.tabs([f"📋 {field_name}" for field_name in reversed_field_names])
+                        tabs = st.tabs([f"{field_name}" for field_name in reversed_field_names])
                         
                         # Render content for each tab
                         for i, field_name in enumerate(reversed_field_names):
                             with tabs[i]:
-                                field_value = display_fields[field_name]
-                                rendered_html = viewer.render_field(field_name, field_value)
-                                st.markdown(rendered_html, unsafe_allow_html=True)
+                                # Add copy button for content fields
+                                if 'content' in field_name.lower():
+                                    # Get the original field value (not merged)
+                                    original_value = current_record[field_name]
+                                    if isinstance(original_value, str):
+                                        # Create copy button with original text
+                                        copy_col1, copy_col2 = st.columns([8, 1])
+                                        with copy_col1:
+                                            field_value = display_fields[field_name]
+                                            rendered_html = viewer.render_field(field_name, field_value)
+                                            st.markdown(rendered_html, unsafe_allow_html=True)
+                                        with copy_col2:
+                                            if st.button("📋", key=f"copy_{field_name}_{i}", help="Copy original content"):
+                                                # Note: Streamlit doesn't have built-in clipboard API
+                                                # We'll show the content in a text area for manual copy
+                                                st.text_area(
+                                                    "Copy this content:",
+                                                    value=original_value,
+                                                    height=200,
+                                                    key=f"copy_area_{field_name}_{i}"
+                                                )
+                                    else:
+                                        # Non-string content, just display
+                                        field_value = display_fields[field_name]
+                                        rendered_html = viewer.render_field(field_name, field_value)
+                                        st.markdown(rendered_html, unsafe_allow_html=True)
+                                else:
+                                    # Regular field display
+                                    field_value = display_fields[field_name]
+                                    rendered_html = viewer.render_field(field_name, field_value)
+                                    st.markdown(rendered_html, unsafe_allow_html=True)
                         
                     else:
                         st.warning("No displayable fields in current record")
