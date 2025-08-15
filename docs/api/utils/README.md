@@ -71,6 +71,23 @@ YAML配置文件加载和管理。
 - 令牌数量统计
 - 文本处理工具函数
 
+### 📊 [数据可视化工具 (xvis)](xvis.md)
+基于Streamlit的JSONL语料文件可视化查看工具。
+
+**核心类：**
+- `JSONLViewer` - JSONL文件查看器
+- `main()` - Streamlit应用入口
+
+**主要功能：**
+- 多文件批量加载和浏览
+- 字段搜索和过滤
+- 智能导航和跳转
+- Tokens字段自动合并
+- 数据统计和源文件追踪
+
+**相关脚本：**
+- [`vis.py`](vis_entry.md) - 可视化工具启动器
+
 ## 使用模式
 
 ### 单独导入
@@ -87,7 +104,8 @@ from xpertcorpus.utils import (
     xlogger,
     XConfigLoader,
     FileStorage,
-    count_tokens
+    count_tokens,
+    JSONLViewer
 )
 ```
 
@@ -149,6 +167,31 @@ model_config = config_loader.get_model_config()
 api_config = config_loader.get_api_config()
 ```
 
+### 4. 数据可视化
+```python
+from xpertcorpus.utils import JSONLViewer
+
+# 创建查看器
+viewer = JSONLViewer()
+
+# 加载文件
+file_paths = ["/path/to/corpus1.jsonl", "/path/to/corpus2.jsonl"]
+success = viewer.load_files(file_paths, max_records=1000)
+
+# 搜索和导航
+results = viewer.search("content", "关键词")
+current_record = viewer.navigate(1)
+```
+
+### 5. Web界面启动
+```bash
+# 启动可视化工具
+python -m xpertcorpus.vis
+
+# 或直接运行
+streamlit run xpertcorpus/utils/xvis.py
+```
+
 ## 依赖关系
 
 ```
@@ -161,6 +204,8 @@ xutils → xlogger                       # 工具函数依赖日志系统
 - PyYAML (配置管理)
 - pandas (存储管理) 
 - transformers (工具函数)
+- streamlit (数据可视化)
+- markdown (可视化渲染)
 ```
 
 ## 版本历史
@@ -170,6 +215,8 @@ xutils → xlogger                       # 工具函数依赖日志系统
   - 实现基础的异常处理、日志、配置、存储功能
   - 添加令牌计数工具函数
   - 完善存储系统（压缩、验证、流式处理）
+  - 添加JSONL数据可视化工具（xvis）
+  - 集成Streamlit Web界面和智能字段合并功能
 
 
 ---
